@@ -1,0 +1,26 @@
+package enum
+
+import "github.com/zxc7563598/oneadmin/internal/i18n"
+
+type Gender int
+
+const (
+	GenderFemale Gender = iota
+	GenderMale
+	GenderUnknown
+)
+
+func (g Gender) Key() string {
+	switch g {
+	case GenderFemale:
+		return "gender.female"
+	case GenderMale:
+		return "gender.male"
+	default:
+		return "unknown"
+	}
+}
+
+func (g Gender) Text(lang string) string {
+	return i18n.T(lang, g.Key())
+}
