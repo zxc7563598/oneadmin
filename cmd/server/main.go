@@ -33,6 +33,10 @@ func main() {
 	if err := migrate.Run(db); err != nil {
 		panic(err)
 	}
+	// 初始化填充数据
+	if err := migrate.Seed(db); err != nil {
+		panic(err)
+	}
 	// 初始化 Gin 应用
 	r := bootstrap.NewApp(db)
 	// 创建 HTTP Server
