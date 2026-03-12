@@ -1,8 +1,14 @@
 error:
   0: 成功
 
-user:
-  status:
-    active: 正常
-    disabled: 禁用
-    pending: 未激活
+gender:
+  female: 女
+  male: 男
+
+enable:
+  disable: 停用
+  enable: 启用
+
+no: 否
+yes: 是
+unknown: 未知

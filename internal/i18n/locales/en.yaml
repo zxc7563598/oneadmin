@@ -1,8 +1,14 @@
 error:
   0: Success
 
-user:
-  status:
-    active: Active
-    disabled: Disabled
-    pending: Pending
+gender:
+  female: female
+  male: male
+
+enable:
+  disable: disable
+  enable: enable
+
+no: no
+yes: yes
+unknown: unknown
