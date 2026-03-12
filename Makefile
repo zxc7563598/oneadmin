@@ -1,0 +1,134 @@
+# 项目名称
+APP_NAME := oneadmin
+
+# Go 参数
+GO := go
+GO_BUILD := $(GO) build
+GO_RUN := $(GO) run
+
+# 目录
+CMD_DIR := ./cmd/server
+BUILD_DIR := ./bin
+
+# 版本信息
+VERSION ?= dev
+COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
+BUILD_TIME := $(shell date +"%Y-%m-%d %H:%M:%S")
+
+LDFLAGS := -ldflags "\
+-X main.Version=$(VERSION) \
+-X main.Commit=$(COMMIT) \
+-X 'main.BuildTime=$(BUILD_TIME)' \
+-s -w"
+
+.DEFAULT_GOAL := help
+
+## 帮助
+help:
+	@echo ""
+	@echo "OneAdmin Makefile"
+	@echo ""
+	@echo "开发命令:"
+	@echo "  make dev           启动开发环境 (Go + Web)"
+	@echo "  make dev-go        仅启动 Go 服务"
+	@echo "  make dev-web       仅启动 Web dev server"
+	@echo ""
+	@echo "构建命令:"
+	@echo "  make build         构建当前平台"
+	@echo "  make build-web     构建 Web 前端"
+	@echo ""
+	@echo "打包命令:"
+	@echo "  make build-linux       构建 Linux"
+	@echo "  make build-macos       构建 macOS Intel"
+	@echo "  make build-macos-arm   构建 macOS ARM"
+	@echo "  make build-windows     构建 Windows"
+	@echo "  make release           构建所有平台"
+	@echo ""
+	@echo "其他:"
+	@echo "  make clean         清理构建文件"
+	@echo ""
+
+## ===============================
+## 开发环境
+## ===============================
+
+dev:
+	@echo "启动开发环境..."
+	@echo "Web: http://localhost:5173"
+	@echo "API: http://localhost:9000"
+	@make -j2 dev-go dev-web
+
+dev-go:
+	@echo "启动 Go 服务..."
+	$(GO_RUN) $(CMD_DIR)/main.go
+
+dev-web:
+	@echo "启动 Web dev server..."
+	@cd ./web && npm install && npm run dev
+
+
+## ===============================
+## Web 构建
+## ===============================
+
+build-web:
+	@echo "构建 Web 站点页面..."
+	@command -v npm >/dev/null 2>&1 || { \
+	echo "❌ 未检测到 npm，请先安装 Node.js (https://nodejs.org)"; \
+	exit 1; \
+	}
+	@echo "检测到 npm，开始构建 Web 站点..."
+	@cd ./web && npm install && npm run build
+	@echo "同步 dist 到 internal/webui/dist"
+	@rm -rf ./internal/webui/dist
+	@mkdir -p ./internal/webui
+	@cp -R ./web/dist ./internal/webui/dist
+
+
+## ===============================
+## Go 构建
+## ===============================
+
+build: build-web
+	@echo "构建 $(APP_NAME)..."
+	@mkdir -p $(BUILD_DIR)
+	$(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME) $(CMD_DIR)
+
+build-linux: build-web
+	@echo "构建 Linux 版本..."
+	@mkdir -p $(BUILD_DIR)
+	GOOS=linux GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-linux-amd64 $(CMD_DIR)
+
+build-macos: build-web
+	@echo "构建 macOS Intel 版本..."
+	@mkdir -p $(BUILD_DIR)
+	GOOS=darwin GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-darwin-amd64 $(CMD_DIR)
+
+build-macos-arm:
+	@echo "构建 macOS ARM 版本..."
+	@mkdir -p $(BUILD_DIR)
+	GOOS=darwin GOARCH=arm64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-darwin-arm64 $(CMD_DIR)
+
+build-windows: build-web
+	@echo "构建 Windows 版本..."
+	@mkdir -p $(BUILD_DIR)
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-windows-amd64.exe $(CMD_DIR)
+
+
+## ===============================
+## 发布
+## ===============================
+
+release: build-linux build-macos build-macos-arm build-windows
+	@echo ""
+	@echo "构建完成，输出目录:"
+	@echo "  $(BUILD_DIR)"
+
+
+## ===============================
+## 清理
+## ===============================
+
+clean:
+	@echo "清理构建目录..."
+	@rm -rf $(BUILD_DIR)
