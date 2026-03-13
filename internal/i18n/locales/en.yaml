@@ -1,6 +1,15 @@
 error:
   0: Success
 
+  20001: Please log in first.
+  20002: Login information retrieval failed.
+  20003: Invalid login status, please log in again.
+  20004: Abnormal login status, please log in again.
+  20005: Login expired, please log in again.
+  20006: Account already logged in on another device.
+
+  50001: System busy, please try again later.
+
 gender:
   female: female
   male: male
