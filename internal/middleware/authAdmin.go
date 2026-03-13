@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -11,8 +10,6 @@ import (
 	"github.com/zxc7563598/oneadmin/internal/response"
 	"github.com/zxc7563598/oneadmin/pkg/jwt"
 )
-
-const RenewThreshold = 15 * time.Minute
 
 func AdminAuth(rdb *redis.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -37,6 +34,7 @@ func AdminAuth(rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 		// Redis 单点登录校验
+		// 如果未启动 Redis 则不进行单点校正，用户会在 AccessToken 过期后，重新申请 RefreshToken 时才会被踢出
 		if rdb != nil {
 			ctx := c.Request.Context()
 			key := fmt.Sprintf("admin:token:%d", claims.ID)
@@ -52,28 +50,6 @@ func AdminAuth(rdb *redis.Client) gin.HandlerFunc {
 			if redisToken != tokenString {
 				response.Error(c, 20006)
 				return
-			}
-		}
-		expireTime := claims.ExpiresAt.Time
-		remain := time.Until(expireTime)
-		// 滑动续期
-		if remain < RenewThreshold {
-			newToken, err := jwt.GenerateAccessToken(
-				claims.ID,
-				"admin",
-			)
-			if err == nil {
-				c.Header("X-New-Token", newToken)
-				if rdb != nil {
-					ctx := c.Request.Context()
-					key := fmt.Sprintf("admin:token:%d", claims.ID)
-					rdb.Set(
-						ctx,
-						key,
-						newToken,
-						jwt.AccessTTL(),
-					)
-				}
 			}
 		}
 		// 写入上下文
