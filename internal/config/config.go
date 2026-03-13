@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type DatabaseMysql struct {
+type DatabaseMysqlConfig struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 	User     string `yaml:"user"`
@@ -15,7 +15,7 @@ type DatabaseMysql struct {
 	DBName   string `yaml:"dbname"`
 }
 
-type DatabasePostgres struct {
+type DatabasePostgresConfig struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 	User     string `yaml:"user"`
@@ -23,14 +23,30 @@ type DatabasePostgres struct {
 	DBName   string `yaml:"dbname"`
 }
 
-type Database struct {
-	Driver   string           `yaml:"driver"`
-	Mysql    DatabaseMysql    `yaml:"mysql"`
-	Postgres DatabasePostgres `yaml:"postgres"`
+type DatabaseConfig struct {
+	Driver   string                 `yaml:"driver"`
+	Mysql    DatabaseMysqlConfig    `yaml:"mysql"`
+	Postgres DatabasePostgresConfig `yaml:"postgres"`
+}
+
+type RedisConfig struct {
+	Host         string `yaml:"host"`
+	Port         int    `yaml:"port"`
+	Password     string `yaml:"password"`
+	DB           int    `yaml:"db"`
+	PoolSize     int    `yaml:"pool_size"`
+	MinIdleConns int    `yaml:"min_idle_conns"`
+}
+type JWTConfig struct {
+	Secret     string `yaml:"secret"`
+	AccessTTL  int    `yaml:"access_ttl"`
+	RefreshTTL int    `yaml:"refresh_ttl"`
 }
 
 type Config struct {
-	Database Database `yaml:"database"`
+	Database DatabaseConfig `yaml:"database"`
+	Redis    RedisConfig    `yaml:"redis"`
+	JWT      JWTConfig      `yaml:"jwt"`
 }
 
 // LoadConfig 解析 YAML
@@ -90,6 +106,15 @@ func ValidateConfig(cfg *Config) error {
 		}
 	default:
 		return fmt.Errorf("不支持的数据库驱动程序: %s", cfg.Database.Driver)
+	}
+	if len(cfg.JWT.Secret) < 32 {
+		return fmt.Errorf("JWT 密钥长度不能低于 32 位")
+	}
+	if cfg.JWT.AccessTTL <= 0 {
+		return fmt.Errorf("access ttl 必须大于 0")
+	}
+	if cfg.JWT.RefreshTTL <= 0 {
+		return fmt.Errorf("refresh ttl 必须大于 0")
 	}
 	return nil
 }
