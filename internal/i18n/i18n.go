@@ -1,6 +1,7 @@
 package i18n
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,6 +15,10 @@ var (
 	errorsMap = map[string]map[int]string{}
 	keysMap   = map[string]map[string]string{}
 )
+
+type ctxKey string
+
+const LangKey ctxKey = "lang"
 
 // Load 加在指定语言文件
 func Load(lang string, path string) error {
@@ -120,4 +125,13 @@ func flatten(result map[string]string, prefix string, value any) {
 			flatten(result, key, val)
 		}
 	}
+}
+
+// GetLang 获取当前上下文使用语言
+func GetLang(ctx context.Context) string {
+	lang, ok := ctx.Value(LangKey).(string)
+	if !ok {
+		return "zh"
+	}
+	return lang
 }
