@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +36,7 @@ func AdminAuth(rdb *redis.Client) gin.HandlerFunc {
 		// 如果未启动 Redis 则不进行单点校正，用户会在 AccessToken 过期后，重新申请 RefreshToken 时才会被踢出
 		if rdb != nil {
 			ctx := c.Request.Context()
-			key := fmt.Sprintf("admin:token:%d", claims.ID)
+			key := jwt.AdminTokenKey(claims.ID)
 			redisToken, err := rdb.Get(ctx, key).Result()
 			if err == redis.Nil {
 				response.Error(c, 20005)

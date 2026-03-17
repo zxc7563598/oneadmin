@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -88,4 +89,12 @@ func AccessTTL() time.Duration {
 
 func RefreshTTL() time.Duration {
 	return refreshTokenTTL
+}
+
+func AdminTokenKey(id uint64) string {
+	return fmt.Sprintf("admin:token:%d", id)
+}
+
+func AdminRefreshKey(id uint64) string {
+	return fmt.Sprintf("admin:refresh:%d", id)
 }
