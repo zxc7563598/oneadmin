@@ -34,3 +34,4 @@ go.work.sum
 /internal/webui/dist
 config.yaml
 /bin
+/logs

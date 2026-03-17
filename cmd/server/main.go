@@ -13,6 +13,7 @@ import (
 
 	"github.com/zxc7563598/oneadmin/internal/bootstrap"
 	"github.com/zxc7563598/oneadmin/internal/config"
+	"github.com/zxc7563598/oneadmin/internal/logger"
 	"github.com/zxc7563598/oneadmin/internal/migrate"
 	"github.com/zxc7563598/oneadmin/pkg/jwt"
 )
@@ -25,6 +26,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("无法加载配置: %v", err)
 	}
+	// 初始化日志
+	logger.InitAll()
 	// 初始化redis
 	rdb, err := config.InitRedis(cfg)
 	if err != nil {
