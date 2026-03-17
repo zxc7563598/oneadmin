@@ -14,9 +14,10 @@ type Repository[T any] interface {
 	FindByField(ctx context.Context, tx *gorm.DB, field string, value any) ([]T, error)
 	FindOneByField(ctx context.Context, tx *gorm.DB, field string, value any) (*T, error)
 	FindByCondition(ctx context.Context, tx *gorm.DB, cond map[string]any) ([]T, error)
-	Create(ctx context.Context, tx *gorm.DB, entity *T) error
+	Create(ctx context.Context, tx *gorm.DB, entity *T) (*T, error)
 	CreateBatch(ctx context.Context, tx *gorm.DB, entities []T) error
 	Update(ctx context.Context, tx *gorm.DB, entity *T) error
+	UpdateMap(ctx context.Context, tx *gorm.DB, field string, value any, updates map[string]any) error
 	UpdateField(ctx context.Context, tx *gorm.DB, id uint64, field string, value any) error
 	Delete(ctx context.Context, tx *gorm.DB, id uint64) error
 	DeleteByIDs(ctx context.Context, tx *gorm.DB, ids []uint64) error
@@ -93,10 +94,14 @@ func (r *gormRepo[T]) FindByCondition(ctx context.Context, tx *gorm.DB, cond map
 	return list, nil
 }
 
-// Create 创建一条记录。
-func (r *gormRepo[T]) Create(ctx context.Context, tx *gorm.DB, entity *T) error {
+// Create 创建一条记录，返回创建后的模型（包含ID等数据库生成的值）
+func (r *gormRepo[T]) Create(ctx context.Context, tx *gorm.DB, entity *T) (*T, error) {
 	db := r.getDB(ctx, tx)
-	return db.Create(entity).Error
+	err := db.Create(entity).Error
+	if err != nil {
+		return nil, err
+	}
+	return entity, nil
 }
 
 // CreateBatch 批量创建记录。
@@ -113,6 +118,12 @@ func (r *gormRepo[T]) CreateBatch(ctx context.Context, tx *gorm.DB, entities []T
 func (r *gormRepo[T]) Update(ctx context.Context, tx *gorm.DB, entity *T) error {
 	db := r.getDB(ctx, tx)
 	return db.Save(entity).Error
+}
+
+// UpdateMap 使用map更新指定字段
+func (r *gormRepo[T]) UpdateMap(ctx context.Context, tx *gorm.DB, field string, value any, updates map[string]any) error {
+	db := r.getDB(ctx, tx)
+	return db.Model(new(T)).Where(field+" = ?", value).Updates(updates).Error
 }
 
 // UpdateField 根据主键更新单个字段。
