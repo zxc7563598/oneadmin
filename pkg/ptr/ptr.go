@@ -19,3 +19,12 @@ func String(v string) *string {
 func Bool(v bool) *bool {
 	return &v
 }
+
+// deref 安全地将指针解引用为值，如果指针为nil则返回零值
+func Deref[T any](p *T) T {
+	var zero T
+	if p == nil {
+		return zero
+	}
+	return *p
+}
