@@ -1,14 +1,102 @@
+# Error Code Rule Description
+#
+# Format: T MM XX
+# Example: 1 00 01
+#
+# │ │  └─ Specific Error (XX): Specific error number under the same module, starting from 01
+# │ └──── Module Number (MM): Identifies the module to which the error belongs
+# └────── Error Type (T): Identifies the error category
+#
+# --------------------------------------------------
+# Error Type Description (T)
+#
+# 1 Request Error
+#   - Only handles "issues with the request itself"
+#   - Examples: Missing parameters, type errors, format errors, JSON parsing failures, etc.
+#   - ❗ Does not include business logic judgment
+#
+# 2 Authentication Error (AuthN)
+#   - "Who you are" is unclear
+#   - Examples: Not logged in, invalid token, expired token, etc.
+#
+# 3 Authorization Error (AuthZ)
+#   - "Who you are" is clear, but "you can't do this"
+#   - Examples: Non-admin operations, unauthorized access, etc.
+#
+# 4 Business Error
+#   - Request is valid, but business logic doesn't hold (most commonly used)
+#   - Examples: Incorrect password, insufficient balance, disallowed status, incorrect verification code, etc.
+#
+# 5 Resource Error
+#   - Only indicates "resource does not exist"
+#   - Examples: User does not exist, order does not exist, product does not exist, etc.
+#   - ❗ Does not include permission or business judgment
+#
+# 6 System Error
+#   - Server internal exceptions
+#   - Examples: Database errors, cache errors, third-party service exceptions, uncaught panics, etc.
+#
+# --------------------------------------------------
+# Module Number Description (MM)
+#
+# 00 Common Module
+#    - Common errors, such as parameter validation failures, etc.
+#
+# 01 Admin Module
+#
+# (Can be extended according to actual business needs, recommended to divide by functionality and keep stable)
+#
+# --------------------------------------------------
+# Design Conventions (Recommended to Follow)
+#
+# 1. Under the same error type + module, error codes must be unique
+# 2. XX starts from 01 and increments, do not reuse
+# 3. Ensure error semantics are clear, avoid "one code with multiple meanings"
+# 4. Prioritize using business errors (4xx), do not misuse parameter errors (1xx)
+# 5. Resource errors (5xx) should only be used for "existence", do not mix with permission/business logic
+# 6. System errors (6xx) should minimize exposed details, provide unified prompts on the frontend
+#
+# --------------------------------------------------
+# Examples
+#
+# 10001 Parameter error (Common)
+# 20101 Token expired (Authentication - Admin Module)
+# 30201 No permission to operate (Authorization - User Module)
+# 40301 Incorrect password (Business - Admin Module)
+# 50201 User does not exist (Resource - User Module)
+# 60001 Database exception (System - Common Module)
+#
 error:
-  0: Success
+  0: Operation successful # success
 
-  20001: Please log in first.
-  20002: Login information retrieval failed.
-  20003: Invalid login status, please log in again.
-  20004: Abnormal login status, please log in again.
-  20005: Login expired, please log in again.
-  20006: Account already logged in on another device.
+  10101: Login status abnormal, please log in again # refreshToken parse failed
+  10102: Login status abnormal, please log in again # refreshToken data异常
 
-  50001: System busy, please try again later.
+  20101: Login expired, please log in again # accessToken / session invalid
+
+  30101: Unable to switch to this role # Current account lacks permission to switch to this role
+
+  40101: Incorrect account or password # Password error (avoid being too specific)
+  40102: Account unavailable # Admin account disabled
+  40103: Role unavailable # Role disabled
+  40104: New password cannot be the same as the old password # Old and new passwords match
+
+  50101: Admin does not exist or has been deleted # Admin information not found in database
+  50102: Role does not exist or has been deleted # Role information not found in database
+
+  60101: System busy, please try again later # Database query exception
+  60102: System busy, please try again later # accessToken generation failed
+  60103: System busy, please try again later # refreshToken generation failed
+  60104: System busy, please try again later # Update admin token failed
+  60105: System busy, please try again later # Redis store accessToken failed
+  60106: System busy, please try again later # Redis store refreshToken failed
+  60107: System busy, please try again later # Redis clear token failed
+  60108: Operation failed, please try again later # Change admin role failed (business + system boundary)
+  60109: System busy, please try again later # Password hash generation failed
+  60110: Operation failed, please try again later # Change admin password failed
+  60111: Operation failed, please try again later # Update admin basic information failed
+  60112: Operation failed, please try again later # Delete admin failed
+  60113: Operation failed, please try again later # Update admin personal information failed
 
 gender:
   female: female
