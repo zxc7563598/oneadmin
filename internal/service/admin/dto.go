@@ -42,7 +42,7 @@ type ListPageReq struct {
 
 // ListPage 请求返回
 type ListPageResp struct {
-	Total    int `json:"total"`
+	Total    int64 `json:"total"`
 	PageData []ListPageItem
 }
 

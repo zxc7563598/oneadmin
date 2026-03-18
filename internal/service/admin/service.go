@@ -239,7 +239,7 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 	}
 	// 返回数据
 	return ListPageResp{
-		Total:    int(total),
+		Total:    total,
 		PageData: respList,
 	}, 0, nil
 }
