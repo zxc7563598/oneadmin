@@ -18,11 +18,20 @@ func (Role) TableName() string {
 type RoleListQuery struct {
 	Offset int
 	Limit  int
+	Name   *string
+	Enable *int
 }
 
 // RoleListItem 用于后台列表展示，不对应数据库表
 type RoleListItem struct {
 	ID     uint64
+	Code   string
+	Name   string
+	Enable enum.Enable
+}
+
+// RoleForm 用于更新角色资料，不对应数据库表
+type RoleForm struct {
 	Code   string
 	Name   string
 	Enable enum.Enable
