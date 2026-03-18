@@ -14,7 +14,7 @@ type RoleSaveReq struct {
 	Code    string   `json:"code" binding:"required" err:"required=10202"`
 	Name    string   `json:"name" binding:"required" err:"required=10203"`
 	Enable  bool     `json:"enable" binding:"required" err:"required=10204"`
-	MenuIDs []uint64 `json:"menu_ids`
+	MenuIDs []uint64 `json:"menu_ids"`
 }
 
 // RoleDeleteReq 删除角色请求
