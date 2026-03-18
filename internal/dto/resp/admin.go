@@ -8,7 +8,7 @@ type AdminLoginResp struct {
 
 // AdminListPageResp 获取管理员分页列表返回
 type AdminListPageResp struct {
-	Total    int `json:"total"`
+	Total    int64 `json:"total"`
 	PageData []AdminListPageItem
 }
 
