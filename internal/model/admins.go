@@ -20,3 +20,34 @@ type Admin struct {
 func (Admin) TableName() string {
 	return "admins"
 }
+
+// AdminListQuery 用于后台列表查询入参，不对应数据库表
+type AdminListQuery struct {
+	Username *string
+	Gender   *int
+	Enable   *int
+	Offset   int
+	Limit    int
+}
+
+// AdminListItem 用于后台列表展示，不对应数据库表
+type AdminListItem struct {
+	ID        uint64
+	Username  string
+	Enable    enum.Enable
+	Gender    enum.Gender
+	Avatar    string
+	Address   *string
+	Email     *string
+	RoleID    *uint64
+	CreatedAt int64
+	UpdatedAt int64
+}
+
+// AdminUpdateProfileForm 用于更新管理员个人资料，不对应数据库表
+type AdminUpdateProfileForm struct {
+	Nickname string
+	Email    *string
+	Address  *string
+	Gender   enum.Gender
+}

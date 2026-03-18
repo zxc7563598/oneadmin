@@ -10,3 +10,10 @@ type AdminRole struct {
 func (AdminRole) TableName() string {
 	return "admin_roles"
 }
+
+// AdminRoleListItem 用于后台列表展示，不对应数据库表
+type AdminRoleListItem struct {
+	ID      uint64
+	AdminID uint64
+	RoleID  uint64
+}
