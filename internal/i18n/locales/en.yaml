@@ -69,8 +69,21 @@
 error:
   0: Operation successful # success
 
+  10001: Invalid request parameters # Parameter validation failed
+
   10101: Login status abnormal, please log in again # refreshToken parse failed
   10102: Login status abnormal, please log in again # refreshToken data异常
+  10103: Invalid request parameters # Parameter validation failed
+  10104: Login status abnormal, please log in again # Authorization header not detected
+  10105: Login status abnormal, please log in again # Authorization parse failed
+  10106: Login status abnormal, please log in again # accessToken parse failed
+  10107: Login status abnormal, please log in again # accessToken data异常
+  10108: Please enter account # Account cannot be empty
+  10109: Please enter password # Password cannot be empty
+  10110: Password length cannot be less than 6 characters # Password length < 6
+  10111: Password length cannot exceed 32 characters # Password length > 32
+  10112: Please select a role # Role cannot be empty
+  10113: Please enter nickname # Nickname cannot be empty
 
   20101: Login expired, please log in again # accessToken / session invalid
 

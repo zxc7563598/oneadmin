@@ -35,13 +35,27 @@ func Load(lang string, path string) error {
 	for k, v := range raw {
 		// error code
 		if k == "error" {
-			if m, ok := v.(map[string]any); ok {
-				for code, msg := range m {
-					i, err := strconv.Atoi(code)
-					if err != nil {
+			if m, ok := v.(map[interface{}]interface{}); ok {
+				for codeKey, msg := range m {
+					// 处理 key (可能是 int 或 float64)
+					var code int
+					switch c := codeKey.(type) {
+					case int:
+						code = c
+					case float64:
+						code = int(c)
+					case string:
+						if cInt, err := strconv.Atoi(c); err == nil {
+							code = cInt
+						} else {
+							continue
+						}
+					default:
+						fmt.Printf("跳过不支持的 key 类型: %T\n", codeKey)
 						continue
 					}
-					errMap[i] = fmt.Sprint(msg)
+					// 处理 value
+					errMap[code] = fmt.Sprint(msg)
 				}
 			}
 			continue
@@ -81,6 +95,7 @@ func LoadLocales(dir string) error {
 
 // GetMessage 获取指定 Code 对应语言内容
 func GetMessage(lang string, code int) string {
+	fmt.Println("请求语言", lang, code)
 	if langMap, ok := errorsMap[lang]; ok {
 		if msg, ok := langMap[code]; ok {
 			return msg
