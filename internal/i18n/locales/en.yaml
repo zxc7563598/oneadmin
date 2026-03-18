@@ -43,6 +43,8 @@
 #    - Common errors, such as parameter validation failures, etc.
 #
 # 01 Admin Module
+# 02 Role Module
+# 03 Menu Module
 #
 # (Can be extended according to actual business needs, recommended to divide by functionality and keep stable)
 #
@@ -85,7 +87,13 @@ error:
   10112: Please select a role # Role cannot be empty
   10113: Please enter nickname # Nickname cannot be empty
 
-  20101: Login expired, please log in again # accessToken / session invalid
+  10201: Request parameter is invalid # Parameter verification failed
+  10202: Please enter the role ID. The role code cannot be empty
+  10203: Please enter a role name. # The role name cannot be empty
+  10204: Please select a role status # The role status cannot be empty
+  10205: Please select a role # Role ID cannot be empty
+
+  20001: Login expired, please log in again # accessToken / session invalid
 
   30101: Unable to switch to this role # Current account lacks permission to switch to this role
 
@@ -96,6 +104,8 @@ error:
 
   50101: Admin does not exist or has been deleted # Admin information not found in database
   50102: Role does not exist or has been deleted # Role information not found in database
+
+  50201: The role does not exist or has been deleted # Failed to query role information
 
   60101: System busy, please try again later # Database query exception
   60102: System busy, please try again later # accessToken generation failed
@@ -111,6 +121,11 @@ error:
   60112: Operation failed, please try again later # Delete admin failed
   60113: Operation failed, please try again later # Update admin personal information failed
 
+  60201: System busy, please try again later # Database query exception
+  60202: Operation failed, please try again later # Role information modification failed
+  60203: Operation failed, please try again later # Role deletion failed
+  60204: Operation failed, please try again later # Failed to obtain permission menu based on role
+  60205: Operation failed, please try again later # Menu information retrieval failed
 gender:
   female: female
   male: male
