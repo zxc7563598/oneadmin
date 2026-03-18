@@ -99,7 +99,7 @@ func (s *Service) RefreshLogin(ctx context.Context, refreshToken string) (Refres
 		return RefreshLoginResp{}, 50101, nil
 	}
 	if admin.Token == nil || *admin.Token != refreshToken {
-		return RefreshLoginResp{}, 20101, nil
+		return RefreshLoginResp{}, 20001, nil
 	}
 	// 更新token
 	accessToken, err := jwt.GenerateAccessToken(claims.ID, "admin")
