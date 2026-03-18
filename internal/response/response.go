@@ -1,32 +1,33 @@
 package response
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/zxc7563598/oneadmin/internal/i18n"
 )
 
-// Success 通用接口成功返回
-func Success(c *gin.Context, data any) {
-	lang, _ := c.Get("lang")
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  i18n.GetMessage(lang.(string), 0),
+func respond(c *gin.Context, code int, lang string, data any) {
+	if lang == "" {
+		lang = i18n.GetLang(c.Request.Context())
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": code,
+		"msg":  i18n.GetMessage(lang, code),
 		"data": data,
 	})
 }
 
-// Error 通用接口失败返回
-func Error(c *gin.Context, code int, data ...any) {
-	lang, _ := c.Get("lang")
-	var d any
+// Success 接口成功返回
+func Success(c *gin.Context, lang string, data any) {
+	respond(c, 0, lang, data)
+}
+
+// Error 接口失败返回
+func Error(c *gin.Context, lang string, code int, data ...any) {
+	d := any(nil)
 	if len(data) > 0 {
 		d = data[0]
-	} else {
-		d = nil
 	}
-	c.JSON(200, gin.H{
-		"code": code,
-		"msg":  i18n.GetMessage(lang.(string), code),
-		"data": d,
-	})
+	respond(c, code, lang, d)
 }
