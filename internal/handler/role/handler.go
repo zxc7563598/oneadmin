@@ -215,11 +215,11 @@ func (h *Handler) Permissions(c *gin.Context) {
 		return
 	}
 	// 获取角色权限内的菜单
-	menus, errCode, err := h.roleSvc.RoleMenuTreeByAdminID(ctx, adminInfo.AdminID)
+	menus, errCode, err := h.roleSvc.RoleMenuTree(ctx, adminInfo.RoleID, adminInfo.RoleCode)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.RoleLogger,
-			"roleSvc.RoleMenuTreeByAdminID 调用失败",
+			"roleSvc.RoleMenuTree 调用失败",
 			errCode,
 			err,
 			zap.Uint64("adminID", adminInfo.AdminID),

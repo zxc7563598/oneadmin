@@ -184,17 +184,9 @@ func (s *Service) Delete(ctx context.Context, roleID uint64) (int, error) {
 }
 
 // RoleMenuTree 用于获取管理员权限内的菜单
-func (s *Service) RoleMenuTreeByAdminID(ctx context.Context, adminID uint64) ([]RoleMenuItem, int, error) {
-	// 获取管理员当前角色
-	role, err := s.roleRepo.RoleByAdminID(ctx, nil, adminID)
-	if err != nil {
-		return nil, 60201, err
-	}
-	if role == nil {
-		return nil, 50201, nil
-	}
+func (s *Service) RoleMenuTree(ctx context.Context, roleID uint64, roleCode string) ([]RoleMenuItem, int, error) {
 	// 获取菜单信息
-	menus, err := s.getMenusByRole(ctx, role)
+	menus, err := s.getMenusByRole(ctx, roleID, roleCode)
 	if err != nil {
 		return nil, 60205, err
 	}
@@ -222,13 +214,13 @@ func (s *Service) RoleMenuTreeByAdminID(ctx context.Context, adminID uint64) ([]
 }
 
 // getMenusByRole 用于获取指定角色拥有的菜单
-func (s *Service) getMenusByRole(ctx context.Context, role *model.Role) ([]model.Menu, error) {
+func (s *Service) getMenusByRole(ctx context.Context, roleID uint64, roleCode string) ([]model.Menu, error) {
 	// 超级管理员默认拥有全部菜单
-	if role.Code == RoleCodeSuperAdmin {
+	if roleCode == RoleCodeSuperAdmin {
 		return s.menuRepo.GetEnableAll(ctx, nil)
 	}
 	// 非超管，根据角色ID获取菜单
-	roleMenus, err := s.roleMenuRepo.GetByRoleID(ctx, nil, role.ID)
+	roleMenus, err := s.roleMenuRepo.GetByRoleID(ctx, nil, roleID)
 	if err != nil {
 		return nil, err
 	}
