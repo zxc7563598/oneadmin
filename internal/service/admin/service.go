@@ -277,7 +277,6 @@ func (s *Service) Details(ctx context.Context, adminID uint64) (DetailsResp, int
 		return DetailsResp{}, 60101, err
 	}
 	// 组装参数
-	lang := i18n.GetLang(ctx)
 	roleList := make([]DetailsRoleItem, 0, len(roles))
 	var currentRole DetailsRoleItem
 	for _, v := range roles {
@@ -285,7 +284,7 @@ func (s *Service) Details(ctx context.Context, adminID uint64) (DetailsResp, int
 			ID:     v.ID,
 			Code:   v.Code,
 			Name:   v.Name,
-			Enable: v.Enable.Text(lang),
+			Enable: v.Enable == enum.EnableEnable,
 		}
 		roleList = append(roleList, item)
 		if v.ID == admin.RoleID {

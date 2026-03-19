@@ -41,7 +41,7 @@ type AdminDetailsRoleItem struct {
 	ID     uint64 `json:"id"`
 	Code   string `json:"code"`
 	Name   string `json:"name"`
-	Enable string `json:"enable"`
+	Enable bool   `json:"enable"`
 }
 
 type AdminDetailsProfileItem struct {
