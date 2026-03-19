@@ -14,7 +14,7 @@ func RouteRegister(r *gin.Engine, rdb *redis.Client, handlers *Handlers) *gin.En
 	r.RedirectTrailingSlash = false
 	r.RedirectFixedPath = false
 	// 中间件注册
-	r.Use(gin.Logger(), gin.Recovery(), middleware.LocaleMiddleware())
+	r.Use(gin.Logger(), gin.Recovery(), middleware.CORSMiddleware(), middleware.LocaleMiddleware())
 	// web路由
 	admin := r.Group("/admin")
 	// web.Use(middleware.WebBasicAuth(webUser, webPass))
