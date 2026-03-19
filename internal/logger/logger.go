@@ -15,12 +15,14 @@ import (
 var (
 	AdminLogger *zap.Logger
 	RoleLogger  *zap.Logger
+	MenuLogger  *zap.Logger
 )
 
 // InitAll 初始化所有模块 logger
 func InitAll() {
 	AdminLogger = InitLogger("admin", zapcore.InfoLevel)
 	RoleLogger = InitLogger("role", zapcore.InfoLevel)
+	MenuLogger = InitLogger("menu", zapcore.InfoLevel)
 }
 
 // InitLogger 初始化指定模块的 logger
