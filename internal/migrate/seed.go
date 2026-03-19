@@ -6,7 +6,6 @@ import (
 	"github.com/zxc7563598/oneadmin/internal/enum"
 	"github.com/zxc7563598/oneadmin/internal/model"
 	"github.com/zxc7563598/oneadmin/pkg/crypto"
-	"github.com/zxc7563598/oneadmin/pkg/ptr"
 	"gorm.io/gorm"
 )
 
@@ -221,7 +220,7 @@ func seedAdmin(db *gorm.DB) error {
 		Nickname: "默认管理员",
 		Username: "admin",
 		Password: password,
-		RoleID:   ptr.Uint64(1),
+		RoleID:   1,
 		Gender:   enum.GenderUnknown,
 		Enable:   enum.EnableEnable,
 	}
