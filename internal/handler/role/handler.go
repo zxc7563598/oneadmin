@@ -29,7 +29,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -61,7 +61,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 			"roleSvc.ListPage 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Int("req.page", req.Page),
 			zap.Int("req.pageSize", req.PageSize),
 			zap.Any("req.name", req.Name),
@@ -84,7 +84,7 @@ func (h *Handler) ListAll(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -97,7 +97,7 @@ func (h *Handler) ListAll(c *gin.Context) {
 			"roleSvc.ListAll 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -115,7 +115,7 @@ func (h *Handler) Save(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -146,7 +146,7 @@ func (h *Handler) Save(c *gin.Context) {
 			"roleSvc.Save 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Any("req.id", req.ID),
 			zap.String("req.code", req.Code),
 			zap.String("req.name", req.Name),
@@ -167,7 +167,7 @@ func (h *Handler) Delete(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -192,7 +192,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			"roleSvc.Delete 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("req.id", req.RoleID),
 		)
 		response.Error(c, lang, errCode)
@@ -209,20 +209,20 @@ func (h *Handler) Permissions(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
 	}
 	// 获取角色权限内的菜单
-	menus, errCode, err := h.roleSvc.RoleMenuTreeByAdminID(ctx, adminID)
+	menus, errCode, err := h.roleSvc.RoleMenuTreeByAdminID(ctx, adminInfo.AdminID)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.RoleLogger,
 			"roleSvc.RoleMenuTreeByAdminID 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return

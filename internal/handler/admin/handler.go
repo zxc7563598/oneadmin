@@ -103,20 +103,20 @@ func (h *Handler) Logout(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
 	}
 	// 执行请求
-	errCode, err := h.adminSvc.Logout(ctx, adminID)
+	errCode, err := h.adminSvc.Logout(ctx, adminInfo.AdminID)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.AdminLogger,
 			"adminSvc.Logout 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -132,7 +132,7 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -150,14 +150,14 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 		return
 	}
 	// 执行请求
-	errCode, err := h.adminSvc.SwitchRole(ctx, adminID, uint64(req.RoleID))
+	errCode, err := h.adminSvc.SwitchRole(ctx, adminInfo.AdminID, uint64(req.RoleID))
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.AdminLogger,
 			"adminSvc.SwitchRole 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("RoleID", uint64(req.RoleID)),
 		)
 		response.Error(c, lang, errCode)
@@ -174,7 +174,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -192,14 +192,14 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 		return
 	}
 	// 执行请求
-	errCode, err := h.adminSvc.ChangePassword(ctx, adminID, req.OldPassword, req.NewPassword)
+	errCode, err := h.adminSvc.ChangePassword(ctx, adminInfo.AdminID, req.OldPassword, req.NewPassword)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.AdminLogger,
 			"adminSvc.ChangePassword 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -215,7 +215,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -248,7 +248,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 			"adminSvc.ListPage 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Int("req.page", req.Page),
 			zap.Int("req.pageSize", req.PageSize),
 			zap.Any("req.username", req.Username),
@@ -272,20 +272,20 @@ func (h *Handler) Details(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
 	}
 	// 执行请求
-	svcResp, errCode, err := h.adminSvc.Details(ctx, adminID)
+	svcResp, errCode, err := h.adminSvc.Details(ctx, adminInfo.AdminID)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.AdminLogger,
 			"adminSvc.Details 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -322,7 +322,7 @@ func (h *Handler) Save(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -356,7 +356,7 @@ func (h *Handler) Save(c *gin.Context) {
 			"adminSvc.Save 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Any("req.id", req.ID),
 			zap.String("req.username", req.Username),
 			zap.Any("req.role_ids", req.RoleIds),
@@ -375,7 +375,7 @@ func (h *Handler) Delete(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -400,7 +400,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			"adminSvc.Delete 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -416,7 +416,7 @@ func (h *Handler) UpdatePassword(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -441,7 +441,7 @@ func (h *Handler) UpdatePassword(c *gin.Context) {
 			"adminSvc.ResetAdminPassword 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)
@@ -458,7 +458,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -492,7 +492,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 			"adminSvc.UpdateProfile 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("req.id", req.ID),
 			zap.String("req.nickname", req.Nickname),
 			zap.Int("req.gender", *req.Gender),

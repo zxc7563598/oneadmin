@@ -6,14 +6,34 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetAdminID 获取 JWT 携带的管理员 ID
-func GetAdminID(c *gin.Context) (uint64, bool) {
-	v, exists := c.Get("adminID")
-	if !exists {
-		return 0, false
+// AdminInfo JWT 中管理员信息
+type AdminInfo struct {
+	AdminID uint64 `json:"admin_id"`
+	RoleID  uint64 `json:"role_id"`
+}
+
+// GetAdminInfo 获取 JWT 携带的管理员信息
+func GetAdminInfo(c *gin.Context) (AdminInfo, bool) {
+	adminIDVal, ok := c.Get("adminID")
+	if !ok {
+		return AdminInfo{}, false
 	}
-	adminID, ok := v.(uint64)
-	return adminID, ok
+	roleIDVal, ok := c.Get("roleID")
+	if !ok {
+		return AdminInfo{}, false
+	}
+	adminID, ok := adminIDVal.(uint64)
+	if !ok {
+		return AdminInfo{}, false
+	}
+	roleID, ok := roleIDVal.(uint64)
+	if !ok {
+		return AdminInfo{}, false
+	}
+	return AdminInfo{
+		AdminID: adminID,
+		RoleID:  roleID,
+	}, true
 }
 
 // BindAndValidate 绑定请求参数并进行验证，失败将得到错误码

@@ -29,7 +29,7 @@ func (h *Handler) List(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -42,7 +42,7 @@ func (h *Handler) List(c *gin.Context) {
 			"menuSvc.MenuTree 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -60,7 +60,7 @@ func (h *Handler) Validate(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -85,7 +85,7 @@ func (h *Handler) Validate(c *gin.Context) {
 			"menuSvc.MenuExists 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.String("req.path", req.Path),
 		)
 		response.Error(c, lang, errCode)
@@ -104,7 +104,7 @@ func (h *Handler) Buttons(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -129,7 +129,7 @@ func (h *Handler) Buttons(c *gin.Context) {
 			"menuSvc.MenuButtons 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("req.parent_id", req.ParentID),
 		)
 		response.Error(c, lang, errCode)
@@ -148,7 +148,7 @@ func (h *Handler) Save(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -187,7 +187,7 @@ func (h *Handler) Save(c *gin.Context) {
 			"menuSvc.Save 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Any("req.id", req.ID),
 			zap.String("req.code", req.Code),
 			zap.Bool("req.enable", req.Enable),
@@ -216,7 +216,7 @@ func (h *Handler) Toggle(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -241,7 +241,7 @@ func (h *Handler) Toggle(c *gin.Context) {
 			"menuSvc.SetMenuEnable 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)
@@ -258,7 +258,7 @@ func (h *Handler) Delete(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
 	// 获取管理员ID
-	adminID, ok := handler.GetAdminID(c)
+	adminInfo, ok := handler.GetAdminInfo(c)
 	if !ok {
 		response.Error(c, lang, 20001)
 		return
@@ -283,7 +283,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			"menuSvc.Delete 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminID),
+			zap.Uint64("adminID", adminInfo.AdminID),
 			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)
