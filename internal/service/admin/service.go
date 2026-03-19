@@ -55,7 +55,7 @@ func (s *Service) Login(ctx context.Context, username, password string, captcha 
 		return LoginResp{}, 40102, nil
 	}
 	// 获取角色code
-	role, err := s.roleRepo.RoleByAdminID(ctx, nil, admin.ID)
+	role, err := s.roleRepo.GetByID(ctx, nil, admin.RoleID)
 	if err != nil {
 		return LoginResp{}, 60101, err
 	}
@@ -111,7 +111,7 @@ func (s *Service) RefreshLogin(ctx context.Context, refreshToken string) (Refres
 		return RefreshLoginResp{}, 20001, nil
 	}
 	// 获取角色code
-	role, err := s.roleRepo.RoleByAdminID(ctx, nil, admin.ID)
+	role, err := s.roleRepo.GetByID(ctx, nil, admin.RoleID)
 	if err != nil {
 		return RefreshLoginResp{}, 60101, err
 	}

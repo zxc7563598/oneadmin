@@ -12,7 +12,6 @@ import (
 type Repository interface {
 	base.Repository[model.Role]
 	FindEnabled(ctx context.Context, tx *gorm.DB) ([]model.Role, error)
-	RoleByAdminID(ctx context.Context, tx *gorm.DB, adminID uint64) (*model.Role, error)
 	ListPage(ctx context.Context, tx *gorm.DB, query model.RoleListQuery) ([]model.RoleListItem, int64, error)
 	UpdateByID(ctx context.Context, tx *gorm.DB, id uint64, queue model.RoleForm) error
 }
@@ -20,11 +19,6 @@ type Repository interface {
 // FindEnabled 获取全部启用数据
 func (r *gormRepo) FindEnabled(ctx context.Context, tx *gorm.DB) ([]model.Role, error) {
 	return r.FindByField(ctx, tx, "enable", enum.EnableEnable)
-}
-
-// RoleByAdminID 根据管理员ID获取角色信息
-func (r *gormRepo) RoleByAdminID(ctx context.Context, tx *gorm.DB, adminID uint64) (*model.Role, error) {
-	return r.FindOneByField(ctx, tx, "admin_id", adminID)
 }
 
 // ListPage 获取分页列表数据
