@@ -54,12 +54,20 @@ func (s *Service) Login(ctx context.Context, username, password string, captcha 
 	if admin.Enable != enum.EnableEnable {
 		return LoginResp{}, 40102, nil
 	}
+	// 获取角色code
+	role, err := s.roleRepo.RoleByAdminID(ctx, nil, admin.ID)
+	if err != nil {
+		return LoginResp{}, 60101, err
+	}
+	if role == nil {
+		return LoginResp{}, 50102, nil
+	}
 	// 更新token
-	accessToken, err := jwt.GenerateAccessToken(admin.ID, "admin", admin.RoleID)
+	accessToken, err := jwt.GenerateAccessToken(admin.ID, "admin", admin.RoleID, role.Code)
 	if err != nil {
 		return LoginResp{}, 60102, err
 	}
-	refreshToken, err := jwt.GenerateRefreshToken(admin.ID, "admin", admin.RoleID)
+	refreshToken, err := jwt.GenerateRefreshToken(admin.ID, "admin", admin.RoleID, role.Code)
 	if err != nil {
 		return LoginResp{}, 60103, err
 	}
@@ -102,12 +110,20 @@ func (s *Service) RefreshLogin(ctx context.Context, refreshToken string) (Refres
 	if admin.Token == nil || *admin.Token != refreshToken {
 		return RefreshLoginResp{}, 20001, nil
 	}
+	// 获取角色code
+	role, err := s.roleRepo.RoleByAdminID(ctx, nil, admin.ID)
+	if err != nil {
+		return RefreshLoginResp{}, 60101, err
+	}
+	if role == nil {
+		return RefreshLoginResp{}, 50102, nil
+	}
 	// 更新token
-	accessToken, err := jwt.GenerateAccessToken(claims.ID, "admin", admin.RoleID)
+	accessToken, err := jwt.GenerateAccessToken(claims.ID, "admin", admin.RoleID, role.Code)
 	if err != nil {
 		return RefreshLoginResp{}, 60102, err
 	}
-	newRefreshToken, err := jwt.GenerateRefreshToken(claims.ID, "admin", admin.RoleID)
+	newRefreshToken, err := jwt.GenerateRefreshToken(claims.ID, "admin", admin.RoleID, role.Code)
 	if err != nil {
 		return RefreshLoginResp{}, 60103, err
 	}
