@@ -266,7 +266,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 }
 
 // Details 处理获取管理员详情请求
-// POST /api/admin/admin/detail
+// POST /api/admin/auth/detail
 func (h *Handler) Details(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
