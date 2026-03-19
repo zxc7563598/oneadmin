@@ -95,7 +95,6 @@ func LoadLocales(dir string) error {
 
 // GetMessage 获取指定 Code 对应语言内容
 func GetMessage(lang string, code int) string {
-	fmt.Println("请求语言", lang, code)
 	if langMap, ok := errorsMap[lang]; ok {
 		if msg, ok := langMap[code]; ok {
 			return msg
