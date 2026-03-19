@@ -37,6 +37,12 @@ func RouteRegister(r *gin.Engine, rdb *redis.Client, handlers *Handlers) *gin.En
 	adminApi.POST("/roles/save", middleware.AdminAuth(rdb), handlers.Role.Save)
 	adminApi.POST("/roles/delete", middleware.AdminAuth(rdb), handlers.Role.Delete)
 	adminApi.POST("/roles/permissions", middleware.AdminAuth(rdb), handlers.Role.Permissions)
+	adminApi.POST("/menu/list", middleware.AdminAuth(rdb), handlers.Menu.List)
+	adminApi.POST("/menu/validate", middleware.AdminAuth(rdb), handlers.Menu.Validate)
+	adminApi.POST("/menu/buttons", middleware.AdminAuth(rdb), handlers.Menu.Buttons)
+	adminApi.POST("/menu/save", middleware.AdminAuth(rdb), handlers.Menu.Save)
+	adminApi.POST("/menu/toggle", middleware.AdminAuth(rdb), handlers.Menu.Toggle)
+	adminApi.POST("/menu/delete", middleware.AdminAuth(rdb), handlers.Menu.Delete)
 	return r
 }
 
