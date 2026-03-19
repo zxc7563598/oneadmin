@@ -65,7 +65,7 @@ func (s *Service) ListAll(ctx context.Context) ([]ListPageItem, int, error) {
 	// 获取全部数据
 	roles, err := s.roleRepo.FindAll(ctx, nil)
 	if err != nil {
-		return []ListPageItem{}, 60201, err
+		return nil, 60201, err
 	}
 	// 组装数据
 	list := make([]ListPageItem, 0, len(roles))
@@ -208,7 +208,7 @@ func (s *Service) RoleMenuTreeByAdminID(ctx context.Context, adminID uint64) ([]
 			Show:      v.Show == enum.Yes,
 			KeepAlive: v.KeepAlive == enum.Yes,
 			Layout:    v.Layout,
-			Type:      v.Type,
+			Type:      string(v.Type),
 			ParentID:  v.ParentID,
 			Name:      v.Name,
 			Icon:      v.Icon,
@@ -237,7 +237,7 @@ func (s *Service) getMenusByRole(ctx context.Context, role *model.Role) ([]model
 		menuIDs = append(menuIDs, v.MenuID)
 	}
 	if len(menuIDs) == 0 {
-		return []model.Menu{}, nil
+		return nil, nil
 	}
 	return s.menuRepo.GetEnableByID(ctx, nil, menuIDs)
 }
