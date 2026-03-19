@@ -49,10 +49,7 @@ type SaveReq struct {
 	MenuIDs []uint64 `json:"menu_ids"`
 }
 
-// RoleMenuTreeByAdminID 请求返回
-type RoleMenuTreeByAdminIDResp struct {
-}
-
+// RoleMenuItem 单条菜单权限树
 type RoleMenuItem struct {
 	ID          uint64         `json:"id"`
 	Code        string         `json:"code"`
