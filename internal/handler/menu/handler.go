@@ -42,7 +42,7 @@ func (h *Handler) List(c *gin.Context) {
 			"menuSvc.MenuTree 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -85,7 +85,7 @@ func (h *Handler) Validate(c *gin.Context) {
 			"menuSvc.MenuExists 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.String("req.path", req.Path),
 		)
 		response.Error(c, lang, errCode)
@@ -129,7 +129,7 @@ func (h *Handler) Buttons(c *gin.Context) {
 			"menuSvc.MenuButtons 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.parent_id", req.ParentID),
 		)
 		response.Error(c, lang, errCode)
@@ -187,7 +187,7 @@ func (h *Handler) Save(c *gin.Context) {
 			"menuSvc.Save 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Any("req.id", req.ID),
 			zap.String("req.code", req.Code),
 			zap.Bool("req.enable", req.Enable),
@@ -241,7 +241,7 @@ func (h *Handler) Toggle(c *gin.Context) {
 			"menuSvc.SetMenuEnable 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)
@@ -283,7 +283,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			"menuSvc.Delete 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)

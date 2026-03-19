@@ -116,7 +116,7 @@ func (h *Handler) Logout(c *gin.Context) {
 			"adminSvc.Logout 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -157,7 +157,7 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 			"adminSvc.SwitchRole 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("RoleID", uint64(req.RoleID)),
 		)
 		response.Error(c, lang, errCode)
@@ -199,7 +199,7 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 			"adminSvc.ChangePassword 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -248,7 +248,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 			"adminSvc.ListPage 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Int("req.page", req.Page),
 			zap.Int("req.pageSize", req.PageSize),
 			zap.Any("req.username", req.Username),
@@ -285,7 +285,7 @@ func (h *Handler) Details(c *gin.Context) {
 			"adminSvc.Details 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -356,7 +356,7 @@ func (h *Handler) Save(c *gin.Context) {
 			"adminSvc.Save 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Any("req.id", req.ID),
 			zap.String("req.username", req.Username),
 			zap.Any("req.role_ids", req.RoleIds),
@@ -400,7 +400,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			"adminSvc.Delete 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -441,7 +441,7 @@ func (h *Handler) UpdatePassword(c *gin.Context) {
 			"adminSvc.ResetAdminPassword 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)
@@ -492,7 +492,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 			"adminSvc.UpdateProfile 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.id", req.ID),
 			zap.String("req.nickname", req.Nickname),
 			zap.Int("req.gender", *req.Gender),

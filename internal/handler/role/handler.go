@@ -61,7 +61,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 			"roleSvc.ListPage 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Int("req.page", req.Page),
 			zap.Int("req.pageSize", req.PageSize),
 			zap.Any("req.name", req.Name),
@@ -97,7 +97,7 @@ func (h *Handler) ListAll(c *gin.Context) {
 			"roleSvc.ListAll 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -146,7 +146,7 @@ func (h *Handler) Save(c *gin.Context) {
 			"roleSvc.Save 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Any("req.id", req.ID),
 			zap.String("req.code", req.Code),
 			zap.String("req.name", req.Name),
@@ -192,7 +192,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			"roleSvc.Delete 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.id", req.RoleID),
 		)
 		response.Error(c, lang, errCode)
@@ -222,7 +222,7 @@ func (h *Handler) Permissions(c *gin.Context) {
 			"roleSvc.RoleMenuTree 调用失败",
 			errCode,
 			err,
-			zap.Uint64("adminID", adminInfo.AdminID),
+			zap.Any("adminInfo", adminInfo),
 		)
 		response.Error(c, lang, errCode)
 		return
