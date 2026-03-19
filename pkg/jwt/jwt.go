@@ -16,9 +16,10 @@ var (
 )
 
 type Claims struct {
-	ID   uint64 `json:"id"`
-	Type string `json:"type"` // access / refresh
-	Role string `json:"role"` // admin / user
+	ID       uint64 `json:"id"`
+	Type     string `json:"type"`     // access / refresh
+	Identity string `json:"identity"` // admin / user
+	RoleID   uint64 `json:"role_id"`  // 0 and role_id
 	jwt.RegisteredClaims
 }
 
@@ -30,12 +31,13 @@ func Init(c config.JWTConfig) {
 }
 
 // GenerateAccessToken 生成 AccessToken
-func GenerateAccessToken(id uint64, role string) (string, error) {
+func GenerateAccessToken(id uint64, identity string, role uint64) (string, error) {
 	now := time.Now()
 	claims := Claims{
-		ID:   id,
-		Type: "access",
-		Role: role,
+		ID:       id,
+		Type:     "access",
+		Identity: identity,
+		RoleID:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(accessTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -46,12 +48,13 @@ func GenerateAccessToken(id uint64, role string) (string, error) {
 }
 
 // GenerateRefreshToken 生成 RefreshToken
-func GenerateRefreshToken(id uint64, role string) (string, error) {
+func GenerateRefreshToken(id uint64, identity string, role uint64) (string, error) {
 	now := time.Now()
 	claims := Claims{
-		ID:   id,
-		Type: "refresh",
-		Role: role,
+		ID:       id,
+		Type:     "refresh",
+		Identity: identity,
+		RoleID:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(refreshTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(now),
