@@ -55,11 +55,11 @@ func (s *Service) Login(ctx context.Context, username, password string, captcha 
 		return LoginResp{}, 40102, nil
 	}
 	// 更新token
-	accessToken, err := jwt.GenerateAccessToken(admin.ID, "admin")
+	accessToken, err := jwt.GenerateAccessToken(admin.ID, "admin", admin.RoleID)
 	if err != nil {
 		return LoginResp{}, 60102, err
 	}
-	refreshToken, err := jwt.GenerateRefreshToken(admin.ID, "admin")
+	refreshToken, err := jwt.GenerateRefreshToken(admin.ID, "admin", admin.RoleID)
 	if err != nil {
 		return LoginResp{}, 60103, err
 	}
@@ -103,11 +103,11 @@ func (s *Service) RefreshLogin(ctx context.Context, refreshToken string) (Refres
 		return RefreshLoginResp{}, 20001, nil
 	}
 	// 更新token
-	accessToken, err := jwt.GenerateAccessToken(claims.ID, "admin")
+	accessToken, err := jwt.GenerateAccessToken(claims.ID, "admin", admin.RoleID)
 	if err != nil {
 		return RefreshLoginResp{}, 60102, err
 	}
-	newRefreshToken, err := jwt.GenerateRefreshToken(claims.ID, "admin")
+	newRefreshToken, err := jwt.GenerateRefreshToken(claims.ID, "admin", admin.RoleID)
 	if err != nil {
 		return RefreshLoginResp{}, 60103, err
 	}
@@ -272,7 +272,7 @@ func (s *Service) Details(ctx context.Context, adminID uint64) (DetailsResp, int
 			Enable: v.Enable.Text(lang),
 		}
 		roleList = append(roleList, item)
-		if admin.RoleID != nil && v.ID == *admin.RoleID {
+		if v.ID == admin.RoleID {
 			currentRole = item
 		}
 	}
@@ -319,7 +319,7 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 				Nickname: req.Username,
 				Username: req.Username,
 				Password: password,
-				RoleID:   ptr.Uint64(req.RoleIds[0]),
+				RoleID:   req.RoleIds[0],
 				Gender:   enum.GenderUnknown,
 				Enable:   enum.Enable(req.Enable),
 			})
