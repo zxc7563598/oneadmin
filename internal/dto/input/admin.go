@@ -2,7 +2,7 @@ package input
 
 // AdminLoginReq 管理员登录请求
 type AdminLoginReq struct {
-	Username string  `json:"username" binding:"required" err:"required=10108"`
+	Username string  `json:"username" binding:"required,min=1" err:"required=10108,min=10108"`
 	Password string  `json:"password" binding:"required,min=6,max=32" err:"required=10109,min=10110,max=10111"`
 	Captcha  *string `json:"captcha"`
 }
@@ -35,15 +35,15 @@ type AdminListPageReq struct {
 // AdminSaveReq 变更管理员信息请求
 type AdminSaveReq struct {
 	ID       *uint64  `json:"id"`
-	Enable   int      `json:"enable" binding:"required"  err:"required=10103"`
-	Username string   `json:"username" binding:"required"  err:"required=10108"`
+	Enable   *int     `json:"enable"`
+	Username string   `json:"username" binding:"required,min=1" err:"required=10108,min=10108"`
 	Password *string  `json:"password"`
-	RoleIds  []uint64 `json:"roleIds" binding:"required" err:"required=10112"`
+	RoleIds  []uint64 `json:"roleIds" binding:"required,min=1" err:"required=10112,min=10114"`
 }
 
 // AdminDeleteReq 删除管理员信息请求
 type AdminDeleteReq struct {
-	ID uint64 `json:"id" binding:"required"`
+	ID uint64 `json:"id" binding:"required" err:"required=10103"`
 }
 
 // AdminResetAdminPasswordReq 变更管理员密码请求
@@ -54,9 +54,9 @@ type AdminResetAdminPasswordReq struct {
 
 // AdminUpdateProfileReq 修改管理员个人信息请求
 type AdminUpdateProfileReq struct {
-	ID       uint64  `json:"id" binding:"required"`
+	ID       uint64  `json:"id" binding:"required" err:"required=10103"`
 	Nickname string  `json:"nickName" binding:"required" err:"required=10113"`
-	Gender   int     `json:"gender" binding:"required"`
+	Gender   *int    `json:"gender"`
 	Address  *string `json:"address"`
 	Email    *string `json:"email"`
 }

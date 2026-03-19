@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/zxc7563598/oneadmin/internal/enum"
@@ -300,6 +301,15 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		var adminID uint64
 		if req.ID == nil {
+			if req.Password == nil {
+				return fmt.Errorf("添加时密码不允许为空")
+			}
+			if len(*req.Password) < 6 {
+				return fmt.Errorf("密码长度不能少于6位")
+			}
+			if len(*req.Password) > 32 {
+				return fmt.Errorf("密码长度不能超过32位")
+			}
 			// 添加数据
 			password, err := crypto.HashPassword(*req.Password)
 			if err != nil {

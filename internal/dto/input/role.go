@@ -11,10 +11,10 @@ type RoleListPageReq struct {
 // RoleSaveReq 处理创建或变更角色请求
 type RoleSaveReq struct {
 	ID      *uint64  `json:"id"`
-	Code    string   `json:"code" binding:"required" err:"required=10202"`
-	Name    string   `json:"name" binding:"required" err:"required=10203"`
+	Code    string   `json:"code" binding:"required,min=1" err:"required=10202,min=10202"`
+	Name    string   `json:"name" binding:"required,min=1" err:"required=10203,min=10203"`
 	Enable  bool     `json:"enable" binding:"required" err:"required=10204"`
-	MenuIDs []uint64 `json:"menu_ids"`
+	MenuIDs []uint64 `json:"menu_ids" binding:"required,min=1" err:"required=10206,min=10206"`
 }
 
 // RoleDeleteReq 删除角色请求
