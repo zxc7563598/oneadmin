@@ -86,12 +86,20 @@ error:
   10111: Password length cannot exceed 32 characters # Password length > 32
   10112: Please select a role # Role cannot be empty
   10113: Please enter nickname # Nickname cannot be empty
+  10114: Please assign at least one role to this account # Administrators must be bound to at least one role
 
   10201: Request parameter is invalid # Parameter verification failed
   10202: Please enter the role ID. The role code cannot be empty
   10203: Please enter a role name. # The role name cannot be empty
   10204: Please select a role status # The role status cannot be empty
   10205: Please select a role # Role ID cannot be empty
+  10206: Please assign at least one menu to this role. # A role must be bound to at least one menu
+
+  10301: Request parameter is invalid # Parameter verification failed
+  10302: Please enter path information # Path information cannot be empty
+  10303: Please enter the menu ID # The menu code cannot be empty
+  10304: Please select menu type # Menu type cannot be empty
+  10305: Please enter the menu name. # The menu name cannot be empty
 
   20001: Login expired, please log in again # accessToken / session invalid
 
@@ -126,6 +134,13 @@ error:
   60203: Operation failed, please try again later # Role deletion failed
   60204: Operation failed, please try again later # Failed to obtain permission menu based on role
   60205: Operation failed, please try again later # Menu information retrieval failed
+
+  60301: System is busy, please try again later # Database query exception
+  60302: Operation failed, please try again later # Menu information addition failed
+  60303: Operation failed, please try again later # Menu information change failed
+  60304: Operation failed, please try again later # Menu status switching failed
+  60305: Operation failed, please try again later # Menu deletion failed
+
 gender:
   female: female
   male: male
@@ -133,6 +148,10 @@ gender:
 enable:
   disable: disable
   enable: enable
+
+menu_type:
+  button: button
+  menu: menu
 
 no: no
 yes: yes
