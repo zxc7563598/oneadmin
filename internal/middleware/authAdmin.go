@@ -54,6 +54,7 @@ func AdminAuth(rdb *redis.Client) gin.HandlerFunc {
 		// 写入上下文
 		c.Set("adminID", claims.ID)
 		c.Set("roleID", claims.RoleID)
+		c.Set("roleCode", claims.RoleCode)
 		c.Next()
 	}
 }
