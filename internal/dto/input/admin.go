@@ -26,7 +26,7 @@ type AdminChangePasswordReq struct {
 // AdminListPageReq 获取管理员分页列表请求
 type AdminListPageReq struct {
 	Page     int     `json:"page" binding:"required" err:"required=10101"`
-	PageSize int     `json:"page_size" binding:"required" err:"required=10101"`
+	PageSize int     `json:"pageSize" binding:"required" err:"required=10101"`
 	Username *string `json:"username"`
 	Gender   *int    `json:"gender"`
 	Enable   *int    `json:"enable"`
