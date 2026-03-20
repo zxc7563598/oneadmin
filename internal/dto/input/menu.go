@@ -7,7 +7,7 @@ type MenuValidateReq struct {
 
 // 获取菜单下的按钮请求
 type MenuButtonsReq struct {
-	ParentID uint64 `json:"parent_id" binding:"required" err:"required=10301"`
+	ParentID uint64 `json:"parentId" binding:"required" err:"required=10301"`
 }
 
 // 添加或变更菜单信息请求

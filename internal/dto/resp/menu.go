@@ -33,5 +33,6 @@ type MenuValidateResp struct {
 
 // MenuButtonsResp
 type MenuButtonsResp struct {
-	Menu []MenuItem `json:"menu"`
+	Total    int64      `json:"total"`
+	PageData []MenuItem `json:"pageData"`
 }

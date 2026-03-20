@@ -137,7 +137,8 @@ func (h *Handler) Buttons(c *gin.Context) {
 	}
 	// 返回结果
 	response.Success(c, lang, resp.MenuButtonsResp{
-		Menu: toMenuItem(svcResp),
+		Total:    int64(len(svcResp)),
+		PageData: toMenuItem(svcResp),
 	})
 }
 
