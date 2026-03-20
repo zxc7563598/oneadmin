@@ -93,10 +93,10 @@ func (s *Service) Login(ctx context.Context, username, password string, captcha 
 func (s *Service) RefreshLogin(ctx context.Context, refreshToken string) (RefreshLoginResp, int, error) {
 	claims, err := jwt.ParseToken(refreshToken)
 	if err != nil {
-		return RefreshLoginResp{}, 10101, err
+		return RefreshLoginResp{}, 10002, err
 	}
 	if claims.Type != "refresh" {
-		return RefreshLoginResp{}, 10102, nil
+		return RefreshLoginResp{}, 10003, nil
 	}
 	// 获取管理员信息
 	admin, err := s.adminRepo.GetByID(ctx, nil, claims.ID)

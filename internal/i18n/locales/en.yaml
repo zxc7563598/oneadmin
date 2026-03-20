@@ -72,21 +72,21 @@ error:
   0: Operation successful # success
 
   10001: Invalid request parameters # Parameter validation failed
+  10002: Login status abnormal, please log in again # refreshToken parse failed
+  10003: Login status abnormal, please log in again # refreshToken data异常
+  10004: Login status abnormal, please log in again # Authorization header not detected
+  10005: Login status abnormal, please log in again # Authorization parse failed
+  10006: Login status abnormal, please log in again # accessToken parse failed
+  10007: Login status abnormal, please log in again # accessToken data异常
 
-  10101: Login status abnormal, please log in again # refreshToken parse failed
-  10102: Login status abnormal, please log in again # refreshToken data异常
-  10103: Invalid request parameters # Parameter validation failed
-  10104: Login status abnormal, please log in again # Authorization header not detected
-  10105: Login status abnormal, please log in again # Authorization parse failed
-  10106: Login status abnormal, please log in again # accessToken parse failed
-  10107: Login status abnormal, please log in again # accessToken data异常
-  10108: Please enter account # Account cannot be empty
-  10109: Please enter password # Password cannot be empty
-  10110: Password length cannot be less than 6 characters # Password length < 6
-  10111: Password length cannot exceed 32 characters # Password length > 32
-  10112: Please select a role # Role cannot be empty
-  10113: Please enter nickname # Nickname cannot be empty
-  10114: Please assign at least one role to this account # Administrators must be bound to at least one role
+  10101: Invalid request parameters # Parameter validation failed
+  10102: Please enter account # Account cannot be empty
+  10103: Please enter password # Password cannot be empty
+  10104: Password length cannot be less than 6 characters # Password length < 6
+  10105: Password length cannot exceed 32 characters # Password length > 32
+  10106: Please select a role # Role cannot be empty
+  10107: Please enter nickname # Nickname cannot be empty
+  10108: Please assign at least one role to this account # Administrators must be bound to at least one role
 
   10201: Request parameter is invalid # Parameter verification failed
   10202: Please enter the role ID. The role code cannot be empty

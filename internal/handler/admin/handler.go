@@ -340,7 +340,7 @@ func (h *Handler) Save(c *gin.Context) {
 		return
 	}
 	if req.Enable == nil {
-		response.Error(c, lang, 10103)
+		response.Error(c, lang, 10101)
 	}
 	// 执行请求
 	errCode, err := h.adminSvc.Save(ctx, admin.SaveReq{
@@ -476,7 +476,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 	if req.Gender == nil {
-		response.Error(c, lang, 10103)
+		response.Error(c, lang, 10101)
 	}
 	// 执行请求
 	errCode, err := h.adminSvc.UpdateProfile(ctx, admin.UpdateProfileReq{
