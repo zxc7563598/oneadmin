@@ -53,7 +53,7 @@ func AdminAuth(rdb *redis.Client) gin.HandlerFunc {
 				return
 			}
 			if redisToken != tokenString {
-				response.Error(c, "", 20001)
+				response.Error(c, "", 10008)
 				c.Abort()
 				return
 			}
