@@ -75,21 +75,21 @@ func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.AdminL
 
 // UpdateProfile 更新管理员个人资料
 func (r *gormRepo) UpdateProfile(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateProfileForm) error {
-	var updateMap map[string]any
+	updateMap := make(map[string]any)
 	if form.Nickname != nil {
-		updateMap["nickname"] = form.Nickname
+		updateMap["nickname"] = *form.Nickname
 	}
 	if form.Email != nil {
-		updateMap["email"] = form.Email
+		updateMap["email"] = *form.Email
 	}
 	if form.Address != nil {
-		updateMap["address"] = form.Address
+		updateMap["address"] = *form.Address
 	}
 	if form.Gender != nil {
 		updateMap["gender"] = enum.Enable(*form.Gender)
 	}
 	if form.Avatar != nil {
-		updateMap["avatar"] = form.Avatar
+		updateMap["avatar"] = *form.Avatar
 	}
 	return r.UpdateMap(ctx, tx, "id", adminID, updateMap)
 }
