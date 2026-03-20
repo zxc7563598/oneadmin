@@ -22,7 +22,7 @@ export async function getPermissions() {
   let asyncPermissions = []
   try {
     const res = await api.getRolePermissions()
-    asyncPermissions = res?.data || []
+    asyncPermissions = res?.data?.menu || []
   }
   catch (error) {
     console.error(error)

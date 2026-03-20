@@ -34,17 +34,13 @@
         </n-button>
       </template>
 
-      <n-descriptions
-        label-placement="left"
-        :label-style="{ width: '200px', textAlign: 'center' }"
-        :column="1"
-        bordered
-      >
+      <n-descriptions label-placement="left" :label-style="{ width: '200px', textAlign: 'center' }" :column="1"
+        bordered>
         <n-descriptions-item label="昵称">
           {{ userStore.nickName }}
         </n-descriptions-item>
         <n-descriptions-item label="性别">
-          {{ genders.find((item) => item.value === userStore.userInfo?.gender)?.label ?? '未知' }}
+          {{genders.find((item) => item.value === userStore.userInfo?.gender)?.label ?? '未知'}}
         </n-descriptions-item>
         <n-descriptions-item label="地址">
           {{ userStore.userInfo?.address }}
@@ -60,17 +56,15 @@
     </MeModal>
 
     <MeModal ref="pwdModalRef" title="修改密码" width="420px" @ok="handlePwdSave()">
-      <n-form
-        ref="pwdFormRef"
-        :model="pwdForm"
-        label-placement="left"
-        require-mark-placement="left"
-      >
+      <n-form ref="pwdFormRef" :model="pwdForm" label-placement="left" require-mark-placement="left">
+        <input type="text" autocomplete="username" style="display: none;" />
         <n-form-item label="原密码" path="oldPassword" :rule="required">
-          <n-input v-model:value="pwdForm.oldPassword" type="password" placeholder="请输入原密码" show-password-on="mousedown" />
+          <n-input v-model:value="pwdForm.oldPassword" type="password" placeholder="请输入原密码" show-password-on="mousedown"
+            :input-props="{ autocomplete: 'current-password' }" />
         </n-form-item>
         <n-form-item label="新密码" path="newPassword" :rule="required">
-          <n-input v-model:value="pwdForm.newPassword" type="password" placeholder="请输入新密码" show-password-on="mousedown" />
+          <n-input v-model:value="pwdForm.newPassword" type="password" placeholder="请输入新密码" show-password-on="mousedown"
+            :input-props="{ autocomplete: 'new-password' }" />
         </n-form-item>
       </n-form>
     </MeModal>
@@ -81,11 +75,7 @@
           <n-input v-model:value="profileForm.nickName" placeholder="请输入昵称" />
         </n-form-item>
         <n-form-item label="性别" path="gender">
-          <n-select
-            v-model:value="profileForm.gender"
-            :options="genders"
-            placeholder="请选择性别"
-          />
+          <n-select v-model:value="profileForm.gender" :options="genders" placeholder="请选择性别" />
         </n-form-item>
         <n-form-item label="地址" path="address">
           <n-input v-model:value="profileForm.address" placeholder="请输入地址" />

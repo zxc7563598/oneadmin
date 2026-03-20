@@ -6,10 +6,12 @@ import { usePermissionStore, useRouterStore, useTabStore, useUserStore } from '@
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: undefined,
+    refreshToken: undefined,
   }),
   actions: {
-    setToken({ accessToken }) {
+    setToken(accessToken, refreshToken) {
       this.accessToken = accessToken
+      this.refreshToken = refreshToken
     },
     resetToken() {
       this.$reset()
@@ -21,10 +23,10 @@ export const useAuthStore = defineStore('auth', {
         query: route.query,
       })
     },
-    async switchCurrentRole(data) {
+    async switchCurrentRole(accessToken, refreshToken) {
       this.resetLoginState()
       await nextTick()
-      this.setToken(data)
+      this.setToken(accessToken, refreshToken)
     },
     resetLoginState() {
       const { resetUser } = useUserStore()

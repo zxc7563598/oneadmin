@@ -211,12 +211,13 @@ async function onSave() {
     let newFormData
     if (!modalForm.value.parentId)
       modalForm.value.parentId = null
+  console.log('提交数据',modalForm.value)
     if (modalAction.value === 'add') {
-      const res = await api.addPermission(modalForm.value)
+      const res = await api.savePermission(modalForm.value)
       newFormData = res.data
     }
     else if (modalAction.value === 'edit') {
-      await api.savePermission(modalForm.value.id, modalForm.value)
+      await api.savePermission(modalForm.value)
     }
     okLoading.value = false
     $message.success('保存成功')

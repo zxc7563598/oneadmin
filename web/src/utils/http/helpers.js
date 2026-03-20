@@ -26,20 +26,13 @@ function handleAuthExpired(content, needTip) {
 
 export function resolveResError(code, message, needTip = true) {
   switch (code) {
-    case 401:
+    case 10002:
+    case 10003:
+    case 10004:
+    case 10005:
+    case 10006:
+    case 10007:
       return handleAuthExpired('登录已过期，是否重新登录？', needTip)
-    case 11007:
-    case 11008:
-      return handleAuthExpired(`${message}，是否重新登录？`, needTip)
-    case 403:
-      message = '请求被拒绝'
-      break
-    case 404:
-      message = '请求资源或接口不存在'
-      break
-    case 500:
-      message = '服务器发生异常'
-      break
     default:
       message = message ?? `【${code}】: 未知异常!`
       break

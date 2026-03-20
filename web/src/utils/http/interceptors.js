@@ -12,12 +12,9 @@ export function setupInterceptors(axiosInstance) {
         return Promise.resolve(data)
       }
       const code = data?.code ?? status
-
       const needTip = config?.needTip !== false
-
       // 根据code处理对应的操作，并返回处理后的message
-      const message = resolveResError(code, data?.message ?? statusText, needTip)
-
+      const message = resolveResError(code, data?.msg ?? statusText, needTip)
       return Promise.reject({ code, message, error: data ?? response })
     }
     return Promise.resolve(data ?? response)
@@ -33,7 +30,7 @@ function reqResolve(config) {
     return config
   }
 
-  const { accessToken } = useAuthStore()
+  const { accessToken,refreshToken } = useAuthStore()
   if (accessToken) {
     // token: Bearer + xxx
     config.headers.Authorization = `Bearer ${accessToken}`

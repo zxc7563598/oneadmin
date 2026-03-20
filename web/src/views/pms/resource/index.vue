@@ -102,8 +102,8 @@ async function initData(data) {
     return
   }
   treeLoading.value = true
-  const res = await api.getMenuTree()
-  treeData.value = res?.data || []
+  const res = await api.getMenuList()
+  treeData.value = res?.data?.menu || []
   treeLoading.value = false
 
   if (data)
@@ -235,9 +235,7 @@ function handleDeleteBtn(id) {
 async function handleEnable(item) {
   try {
     item.enableLoading = true
-    await api.savePermission(item.id, {
-      enable: !item.enable,
-    })
+    await api.togglePermission(item.id)
     $message.success('操作成功')
     $table.value?.handleSearch()
     item.enableLoading = false
