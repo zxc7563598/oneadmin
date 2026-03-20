@@ -46,8 +46,9 @@ type AdminListItem struct {
 
 // AdminUpdateProfileForm 用于更新管理员个人资料，不对应数据库表
 type AdminUpdateProfileForm struct {
-	Nickname string
+	Nickname *string
 	Email    *string
 	Address  *string
-	Gender   enum.Gender
+	Gender   *int
+	Avatar   *string
 }

@@ -19,8 +19,8 @@ type AdminSwitchRoleReq struct {
 
 // AdminChangePasswordReq 根据旧密码变更新密码请求
 type AdminChangePasswordReq struct {
-	OldPassword string `json:"old_password" binding:"required,min=6,max=32" err:"required=10103,min=10104,max=10105"`
-	NewPassword string `json:"new_password" binding:"required,min=6,max=32" err:"required=10103,min=10104,max=10105"`
+	OldPassword string `json:"oldPassword" binding:"required,min=6,max=32" err:"required=10103,min=10104,max=10105"`
+	NewPassword string `json:"newPassword" binding:"required,min=6,max=32" err:"required=10103,min=10104,max=10105"`
 }
 
 // AdminListPageReq 获取管理员分页列表请求
@@ -55,8 +55,9 @@ type AdminResetAdminPasswordReq struct {
 // AdminUpdateProfileReq 修改管理员个人信息请求
 type AdminUpdateProfileReq struct {
 	ID       uint64  `json:"id" binding:"required" err:"required=10101"`
-	Nickname string  `json:"nickName" binding:"required" err:"required=10107"`
+	Nickname *string `json:"nickName"`
 	Gender   *int    `json:"gender"`
 	Address  *string `json:"address"`
 	Email    *string `json:"email"`
+	Avatar   *string `json:"avatar"`
 }

@@ -475,16 +475,14 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		response.Error(c, lang, code)
 		return
 	}
-	if req.Gender == nil {
-		response.Error(c, lang, 10101)
-	}
 	// 执行请求
 	errCode, err := h.adminSvc.UpdateProfile(ctx, admin.UpdateProfileReq{
 		ID:       req.ID,
 		Nickname: req.Nickname,
-		Gender:   *req.Gender,
+		Gender:   req.Gender,
 		Address:  req.Address,
 		Email:    req.Email,
+		Avatar:   req.Avatar,
 	})
 	if errCode != 0 {
 		handler.ErrorLog(
@@ -494,8 +492,8 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 			err,
 			zap.Any("adminInfo", adminInfo),
 			zap.Uint64("req.id", req.ID),
-			zap.String("req.nickname", req.Nickname),
-			zap.Int("req.gender", *req.Gender),
+			zap.Any("req.nickname", req.Nickname),
+			zap.Any("req.gender", req.Gender),
 			zap.Any("req.Address", req.Address),
 			zap.Any("req.Email", req.Email),
 		)

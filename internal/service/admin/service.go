@@ -436,7 +436,8 @@ func (s *Service) UpdateProfile(ctx context.Context, req UpdateProfileReq) (int,
 		Nickname: req.Nickname,
 		Email:    req.Email,
 		Address:  req.Address,
-		Gender:   enum.Gender(req.Gender),
+		Gender:   req.Gender,
+		Avatar:   req.Avatar,
 	}); err != nil {
 		return 60113, err
 	}
