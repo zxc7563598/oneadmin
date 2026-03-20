@@ -5,9 +5,9 @@ import "github.com/zxc7563598/oneadmin/internal/i18n"
 type Gender int
 
 const (
-	GenderFemale Gender = iota
+	GenderUnknown Gender = iota
 	GenderMale
-	GenderUnknown
+	GenderFemale
 )
 
 func (g Gender) Key() string {
