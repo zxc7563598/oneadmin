@@ -235,7 +235,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 	// 执行请求
 	svcResp, errCode, err := h.adminSvc.ListPage(ctx, admin.ListPageReq{
 		PageResp: admin.PageResp{
-			Page:     req.Page,
+			PageNo:   req.PageNo,
 			PageSize: req.PageSize,
 		},
 		Username: req.Username,
@@ -249,7 +249,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 			errCode,
 			err,
 			zap.Any("adminInfo", adminInfo),
-			zap.Int("req.page", req.Page),
+			zap.Int("req.pageNo", req.PageNo),
 			zap.Int("req.pageSize", req.PageSize),
 			zap.Any("req.username", req.Username),
 			zap.Any("req.gender", req.Gender),

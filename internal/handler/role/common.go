@@ -9,10 +9,11 @@ func toRoleListItems(list []role.ListPageItem) []resp.RoleListPageItem {
 	res := make([]resp.RoleListPageItem, 0, len(list))
 	for _, v := range list {
 		res = append(res, resp.RoleListPageItem{
-			ID:     v.ID,
-			Code:   v.Code,
-			Name:   v.Name,
-			Enable: v.Enable,
+			ID:            v.ID,
+			Code:          v.Code,
+			Name:          v.Name,
+			Enable:        v.Enable,
+			PermissionIds: v.PermissionIds,
 		})
 	}
 	return res

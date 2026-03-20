@@ -2,15 +2,16 @@ package resp
 
 // RoleListPageResp 获取管理员分页列表返回
 type RoleListPageResp struct {
-	Total    int64 `json:"total"`
-	PageData []RoleListPageItem
+	Total    int64              `json:"total"`
+	PageData []RoleListPageItem `json:"pageData"`
 }
 
 type RoleListPageItem struct {
-	ID     uint64 `json:"id"`
-	Code   string `json:"code"`
-	Name   string `json:"name"`
-	Enable bool   `json:"enable"`
+	ID            uint64   `json:"id"`
+	Code          string   `json:"code"`
+	Name          string   `json:"name"`
+	Enable        bool     `json:"enable"`
+	PermissionIds []uint64 `json:"permissionIds"`
 }
 
 // RoleListAllResp 获取全部角色请求返回

@@ -32,7 +32,7 @@ type RoleListItem struct {
 
 // RoleForm 用于更新角色资料，不对应数据库表
 type RoleForm struct {
-	Code   string
-	Name   string
+	Code   *string
+	Name   *string
 	Enable enum.Enable
 }

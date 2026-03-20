@@ -49,7 +49,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 	// 执行请求
 	svcResp, errCode, err := h.roleSvc.ListPage(ctx, role.ListPageReq{
 		PageResp: role.PageResp{
-			Page:     req.Page,
+			PageNo:   req.PageNo,
 			PageSize: req.PageSize,
 		},
 		Name:   req.Name,
@@ -62,7 +62,7 @@ func (h *Handler) ListPage(c *gin.Context) {
 			errCode,
 			err,
 			zap.Any("adminInfo", adminInfo),
-			zap.Int("req.page", req.Page),
+			zap.Int("req.pageNo", req.PageNo),
 			zap.Int("req.pageSize", req.PageSize),
 			zap.Any("req.name", req.Name),
 			zap.Any("req.enable", req.Enable),
@@ -138,7 +138,7 @@ func (h *Handler) Save(c *gin.Context) {
 		Code:    req.Code,
 		Name:    req.Name,
 		Enable:  req.Enable,
-		MenuIDs: req.MenuIDs,
+		MenuIDs: req.PermissionIds,
 	})
 	if errCode != 0 {
 		handler.ErrorLog(
@@ -148,10 +148,10 @@ func (h *Handler) Save(c *gin.Context) {
 			err,
 			zap.Any("adminInfo", adminInfo),
 			zap.Any("req.id", req.ID),
-			zap.String("req.code", req.Code),
-			zap.String("req.name", req.Name),
-			zap.Bool("req.enable", req.Enable),
-			zap.Any("req.menu_ids", req.MenuIDs),
+			zap.Any("req.code", req.Code),
+			zap.Any("req.name", req.Name),
+			zap.Any("req.enable", req.Enable),
+			zap.Any("req.menu_ids", req.PermissionIds),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -185,7 +185,7 @@ func (h *Handler) Delete(c *gin.Context) {
 		return
 	}
 	// 执行请求
-	errCode, err := h.roleSvc.Delete(ctx, req.RoleID)
+	errCode, err := h.roleSvc.Delete(ctx, req.ID)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.RoleLogger,
@@ -193,7 +193,7 @@ func (h *Handler) Delete(c *gin.Context) {
 			errCode,
 			err,
 			zap.Any("adminInfo", adminInfo),
-			zap.Uint64("req.id", req.RoleID),
+			zap.Uint64("req.id", req.ID),
 		)
 		response.Error(c, lang, errCode)
 		return

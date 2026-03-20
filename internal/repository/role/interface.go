@@ -45,9 +45,13 @@ func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.RoleLi
 
 // UpdateByID 变更基本信息
 func (r *gormRepo) UpdateByID(ctx context.Context, tx *gorm.DB, id uint64, queue model.RoleForm) error {
-	return r.UpdateMap(ctx, tx, "id", id, map[string]any{
-		"code":   queue.Code,
-		"name":   queue.Name,
-		"enable": queue.Enable,
-	})
+	updateMap := make(map[string]any)
+	if queue.Code != nil {
+		updateMap["code"] = *queue.Code
+	}
+	if queue.Name != nil {
+		updateMap["name"] = *queue.Name
+	}
+	updateMap["enable"] = queue.Enable
+	return r.UpdateMap(ctx, tx, "id", id, updateMap)
 }

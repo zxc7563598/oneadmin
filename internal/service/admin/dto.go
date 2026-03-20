@@ -2,13 +2,13 @@ package admin
 
 // 通用分页请求参数
 type PageResp struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
+	PageNo   int `json:"pageNo"`
+	PageSize int `json:"pageSize"`
 }
 
 func (r *PageResp) OffsetLimit() (int, int) {
-	if r.Page < 1 {
-		r.Page = 1
+	if r.PageNo < 1 {
+		r.PageNo = 1
 	}
 	if r.PageSize < 1 {
 		r.PageSize = 10
@@ -16,7 +16,7 @@ func (r *PageResp) OffsetLimit() (int, int) {
 	if r.PageSize > 100 {
 		r.PageSize = 100
 	}
-	offset := (r.Page - 1) * r.PageSize
+	offset := (r.PageNo - 1) * r.PageSize
 	return offset, r.PageSize
 }
 

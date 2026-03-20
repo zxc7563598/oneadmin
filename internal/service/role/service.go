@@ -2,6 +2,7 @@ package role
 
 import (
 	"context"
+	"errors"
 	"sort"
 
 	"github.com/zxc7563598/oneadmin/internal/enum"
@@ -43,14 +44,25 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 	if err != nil {
 		return ListPageResp{}, 60201, err
 	}
+	// 获取菜单
+	roleIDs := make([]uint64, 0, len(roles))
+	for _, v := range roles {
+		roleIDs = append(roleIDs, v.ID)
+	}
+	menus, err := s.roleMenuRepo.GetByRoleIDs(ctx, nil, roleIDs)
+	menuIDs := make(map[uint64][]uint64)
+	for _, v := range menus {
+		menuIDs[v.RoleID] = append(menuIDs[v.RoleID], v.MenuID)
+	}
 	// 组装数据
 	list := make([]ListPageItem, 0, len(roles))
 	for _, v := range roles {
 		list = append(list, ListPageItem{
-			ID:     v.ID,
-			Code:   v.Code,
-			Name:   v.Name,
-			Enable: v.Enable == enum.EnableEnable,
+			ID:            v.ID,
+			Code:          v.Code,
+			Name:          v.Name,
+			Enable:        v.Enable == enum.EnableEnable,
+			PermissionIds: menuIDs[v.ID],
 		})
 	}
 	// 返回数据
@@ -62,19 +74,30 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 
 // ListAll 用于获取角色全部信息
 func (s *Service) ListAll(ctx context.Context) ([]ListPageItem, int, error) {
-	// 获取全部数据
+	// 获取角色
 	roles, err := s.roleRepo.FindAll(ctx, nil)
 	if err != nil {
 		return nil, 60201, err
+	}
+	// 获取菜单
+	roleIDs := make([]uint64, 0, len(roles))
+	for _, v := range roles {
+		roleIDs = append(roleIDs, v.ID)
+	}
+	menus, err := s.roleMenuRepo.GetByRoleIDs(ctx, nil, roleIDs)
+	menuIDs := make(map[uint64][]uint64)
+	for _, v := range menus {
+		menuIDs[v.RoleID] = append(menuIDs[v.RoleID], v.MenuID)
 	}
 	// 组装数据
 	list := make([]ListPageItem, 0, len(roles))
 	for _, v := range roles {
 		list = append(list, ListPageItem{
-			ID:     v.ID,
-			Code:   v.Code,
-			Name:   v.Name,
-			Enable: v.Enable == enum.EnableEnable,
+			ID:            v.ID,
+			Code:          v.Code,
+			Name:          v.Name,
+			Enable:        v.Enable == enum.EnableEnable,
+			PermissionIds: menuIDs[v.ID],
 		})
 	}
 	return list, 0, nil
@@ -90,8 +113,10 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 			return err
 		}
 		// 重新绑定角色对应的权限
-		if err := s.resetRoleMenus(ctx, tx, roleID, req.MenuIDs); err != nil {
-			return err
+		if req.MenuIDs != nil {
+			if err := s.resetRoleMenus(ctx, tx, roleID, *req.MenuIDs); err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -103,15 +128,21 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 
 // saveRole 用于变更角色信息
 func (s *Service) saveRole(ctx context.Context, tx *gorm.DB, req SaveReq) (uint64, error) {
+
 	enable := enum.EnableDisable
-	if req.Enable {
-		enable = enum.EnableEnable
+	if req.Enable != nil {
+		if *req.Enable {
+			enable = enum.EnableEnable
+		}
 	}
 	if req.ID == nil {
 		// 新增
+		if req.Code == nil || req.Name == nil {
+			return 0, errors.New("missing required fields")
+		}
 		role, err := s.roleRepo.Create(ctx, tx, &model.Role{
-			Code:   req.Code,
-			Name:   req.Name,
+			Code:   *req.Code,
+			Name:   *req.Name,
 			Enable: enable,
 		})
 		if err != nil {
