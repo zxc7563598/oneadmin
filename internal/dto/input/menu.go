@@ -14,10 +14,10 @@ type MenuButtonsReq struct {
 type MenuSaveReq struct {
 	ID        *uint64 `json:"id"`
 	Code      string  `json:"code" binding:"required,min=1" err:"required=10301,min=10303"`
-	Enable    bool    `json:"enable" binding:"required" err:"required=10301"`
-	Show      bool    `json:"show" binding:"required" err:"required=10301"`
-	KeepAlive bool    `json:"keepAlive" binding:"required" err:"required=10301"`
-	Layout    string  `json:"layout" binding:"required" err:"required=10301"`
+	Enable    bool    `json:"enable"`
+	Show      bool    `json:"show"`
+	KeepAlive bool    `json:"keepAlive"`
+	Layout    string  `json:"layout"`
 	Type      string  `json:"type" binding:"required,min=1" err:"required=10301,min=10304"`
 	ParentID  uint64  `json:"parentId"`
 	Name      string  `json:"name" binding:"required,min=1" err:"required=10301,min=10305"`

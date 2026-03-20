@@ -28,10 +28,10 @@ type RoleMenuItem struct {
 	Code        string         `json:"code"`
 	Enable      bool           `json:"enable"`
 	Show        bool           `json:"show"`
-	KeepAlive   bool           `json:"keep_alive"`
+	KeepAlive   bool           `json:"keepAlive"`
 	Layout      string         `json:"layout"`
 	Type        string         `json:"type"`
-	ParentID    uint64         `json:"parent_id"`
+	ParentID    uint64         `json:"parentId"`
 	Name        string         `json:"name"`
 	Icon        string         `json:"icon"`
 	Path        string         `json:"path"`
