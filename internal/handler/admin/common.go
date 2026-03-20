@@ -16,7 +16,7 @@ func toAdminListItems(list []admin.ListPageItem) []resp.AdminListPageItem {
 			Avatar:    v.Avatar,
 			Address:   v.Address,
 			Email:     v.Email,
-			RoleID:    v.RoleID,
+			Roles:     toAdminDetailsRoleItem(v.Roles),
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		})

@@ -47,16 +47,16 @@ type ListPageResp struct {
 }
 
 type ListPageItem struct {
-	ID        uint64  `json:"id"`
-	Username  string  `json:"username"`
-	Enable    string  `json:"enable"`
-	Gender    string  `json:"gender"`
-	Avatar    string  `json:"avatar"`
-	Address   *string `json:"address"`
-	Email     *string `json:"email"`
-	RoleID    *uint64 `json:"role_id"`
-	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at"`
+	ID        uint64            `json:"id"`
+	Username  string            `json:"username"`
+	Enable    bool              `json:"enable"`
+	Gender    int               `json:"gender"`
+	Avatar    string            `json:"avatar"`
+	Address   *string           `json:"address"`
+	Email     *string           `json:"email"`
+	Roles     []DetailsRoleItem `json:"roles"`
+	CreatedAt string            `json:"created_at"`
+	UpdatedAt string            `json:"updated_at"`
 }
 
 // Details 请求返回

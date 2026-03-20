@@ -6,7 +6,6 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/zxc7563598/oneadmin/internal/enum"
-	"github.com/zxc7563598/oneadmin/internal/i18n"
 	"github.com/zxc7563598/oneadmin/internal/model"
 	"github.com/zxc7563598/oneadmin/internal/repository/admin"
 	"github.com/zxc7563598/oneadmin/internal/repository/admin_role"
@@ -226,7 +225,7 @@ func (s *Service) ChangePassword(ctx context.Context, adminID uint64, oldPasswor
 func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, int, error) {
 	// 获取列表数据
 	offset, limit := req.OffsetLimit()
-	items, total, err := s.adminRepo.ListPage(ctx, nil, model.AdminListQuery{
+	admins, total, err := s.adminRepo.ListPage(ctx, nil, model.AdminListQuery{
 		Username: req.Username,
 		Gender:   req.Gender,
 		Enable:   req.Enable,
@@ -236,19 +235,50 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 	if err != nil {
 		return ListPageResp{}, 60101, err
 	}
+	// 获取列表管理员角色
+	adminIDs := make([]uint64, 0, len(admins))
+	for _, v := range admins {
+		adminIDs = append(adminIDs, v.ID)
+	}
+	adminRoles, err := s.adminRoleRepo.GetByRoleIDs(ctx, nil, adminIDs)
+	if err != nil {
+		return ListPageResp{}, 60101, err
+	}
+	// 获取全部角色
+	roles, err := s.roleRepo.FindAll(ctx, nil)
+	if err != nil {
+		return ListPageResp{}, 60101, err
+	}
 	// 组装数据
-	lang := i18n.GetLang(ctx)
-	respList := make([]ListPageItem, 0, len(items))
-	for _, v := range items {
+	roleMap := make(map[uint64]DetailsRoleItem)
+	for _, v := range roles {
+		roleMap[v.ID] = DetailsRoleItem{
+			ID:     v.ID,
+			Code:   v.Code,
+			Name:   v.Name,
+			Enable: v.Enable == enum.EnableEnable,
+		}
+	}
+	//
+	adminRoleMap := make(map[uint64][]DetailsRoleItem)
+	for _, ar := range adminRoles {
+		role, ok := roleMap[ar.RoleID]
+		if !ok {
+			continue
+		}
+		adminRoleMap[ar.AdminID] = append(adminRoleMap[ar.AdminID], role)
+	}
+	respList := make([]ListPageItem, 0, len(admins))
+	for _, v := range admins {
 		item := ListPageItem{
 			ID:        v.ID,
 			Username:  v.Username,
-			Enable:    v.Enable.Text(lang),
-			Gender:    v.Gender.Text(lang),
+			Enable:    v.Enable == enum.EnableEnable,
+			Gender:    int(v.Gender),
 			Avatar:    v.Avatar,
 			Address:   v.Address,
 			Email:     v.Email,
-			RoleID:    v.RoleID,
+			Roles:     adminRoleMap[v.ID],
 			CreatedAt: timeutil.Format(v.CreatedAt),
 			UpdatedAt: timeutil.Format(v.UpdatedAt),
 		}

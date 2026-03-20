@@ -8,21 +8,21 @@ type AdminLoginResp struct {
 
 // AdminListPageResp 获取管理员分页列表返回
 type AdminListPageResp struct {
-	Total    int64 `json:"total"`
-	PageData []AdminListPageItem
+	Total    int64               `json:"total"`
+	PageData []AdminListPageItem `json:"pageData"`
 }
 
 type AdminListPageItem struct {
-	ID        uint64  `json:"id"`
-	Username  string  `json:"username"`
-	Enable    string  `json:"enable"`
-	Gender    string  `json:"gender"`
-	Avatar    string  `json:"avatar"`
-	Address   *string `json:"address"`
-	Email     *string `json:"email"`
-	RoleID    *uint64 `json:"roleId"`
-	CreatedAt string  `json:"createdAt"`
-	UpdatedAt string  `json:"updatedAt"`
+	ID        uint64                 `json:"id"`
+	Username  string                 `json:"username"`
+	Enable    bool                   `json:"enable"`
+	Gender    int                    `json:"gender"`
+	Avatar    string                 `json:"avatar"`
+	Address   *string                `json:"address"`
+	Email     *string                `json:"email"`
+	Roles     []AdminDetailsRoleItem `json:"roles"`
+	CreatedAt string                 `json:"createdAt"`
+	UpdatedAt string                 `json:"updatedAt"`
 }
 
 // AdminDetailsResp 获取单个管理员详细信息返回

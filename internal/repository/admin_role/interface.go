@@ -12,6 +12,7 @@ type Repository interface {
 	base.Repository[model.AdminRole]
 	HasRole(ctx context.Context, tx *gorm.DB, adminID, roleID uint64) (bool, error)
 	DeleteByAdminID(ctx context.Context, tx *gorm.DB, adminID uint64) error
+	GetByRoleIDs(ctx context.Context, tx *gorm.DB, ids []uint64) ([]model.AdminRole, error)
 }
 
 // HasRole 判断管理员是否拥有指定角色
@@ -31,4 +32,14 @@ func (r *gormRepo) DeleteByAdminID(ctx context.Context, tx *gorm.DB, adminID uin
 		Where("admin_id = ?", adminID).
 		Delete(&model.AdminRole{}).
 		Error
+}
+
+// GetByAdminIDs 根据管理员ID批量获取
+func (r *gormRepo) GetByRoleIDs(ctx context.Context, tx *gorm.DB, ids []uint64) ([]model.AdminRole, error) {
+	db := r.getDB(ctx, tx)
+	var list []model.AdminRole
+	if err := db.Where("admin_id IN ?", ids).Find(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
 }

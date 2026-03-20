@@ -29,7 +29,7 @@ func (r *gormRepo) DeleteByRoleID(ctx context.Context, tx *gorm.DB, roleID uint6
 		Error
 }
 
-// GetByRoleIDs 根据管理员ID批量获取
+// GetByRoleIDs 根据角色ID批量获取
 func (r *gormRepo) GetByRoleIDs(ctx context.Context, tx *gorm.DB, ids []uint64) ([]model.RoleMenu, error) {
 	db := r.getDB(ctx, tx)
 	var list []model.RoleMenu
