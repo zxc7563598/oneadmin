@@ -20,6 +20,11 @@ func (r *PageResp) OffsetLimit() (int, int) {
 	return offset, r.PageSize
 }
 
+type TokenResp struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
 // Login 请求返回
 type LoginResp struct {
 	AccessToken  string `json:"accessToken"`
@@ -28,6 +33,12 @@ type LoginResp struct {
 
 // RefreshLogin 请求返回
 type RefreshLoginResp struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+// SwitchRoleResp 请求返回
+type SwitchRoleResp struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }

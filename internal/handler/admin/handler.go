@@ -150,7 +150,7 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 		return
 	}
 	// 执行请求
-	errCode, err := h.adminSvc.SwitchRole(ctx, adminInfo.AdminID, uint64(req.RoleID))
+	svcResp, errCode, err := h.adminSvc.SwitchRole(ctx, adminInfo.AdminID, uint64(req.RoleID))
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.AdminLogger,
@@ -164,7 +164,10 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 		return
 	}
 	// 返回结果
-	response.Success(c, lang, nil)
+	response.Success(c, lang, resp.AdminLoginResp{
+		AccessToken:  svcResp.AccessToken,
+		RefreshToken: svcResp.RefreshToken,
+	})
 }
 
 // ChangePassword 处理管理员根据旧密码变更新密码请求

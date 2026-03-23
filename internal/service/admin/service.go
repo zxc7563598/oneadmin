@@ -62,29 +62,14 @@ func (s *Service) Login(ctx context.Context, username, password string, captcha 
 		return LoginResp{}, 50102, nil
 	}
 	// 更新token
-	accessToken, err := jwt.GenerateAccessToken(admin.ID, "admin", admin.RoleID, role.Code)
+	updateToken, errCode, err := s.updateToken(ctx, admin.ID, admin.RoleID, role.Code)
 	if err != nil {
-		return LoginResp{}, 60102, err
-	}
-	refreshToken, err := jwt.GenerateRefreshToken(admin.ID, "admin", admin.RoleID, role.Code)
-	if err != nil {
-		return LoginResp{}, 60103, err
-	}
-	if err := s.adminRepo.UpdateToken(ctx, nil, admin.ID, &refreshToken); err != nil {
-		return LoginResp{}, 60104, err
-	}
-	if s.rdb != nil {
-		if err := s.rdb.Set(ctx, jwt.AdminTokenKey(admin.ID), accessToken, jwt.AccessTTL()).Err(); err != nil {
-			return LoginResp{}, 60105, err
-		}
-		if err := s.rdb.Set(ctx, jwt.AdminRefreshKey(admin.ID), refreshToken, jwt.RefreshTTL()).Err(); err != nil {
-			return LoginResp{}, 60106, err
-		}
+		return LoginResp{}, errCode, err
 	}
 	// 返回数据
 	return LoginResp{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  updateToken.AccessToken,
+		RefreshToken: updateToken.RefreshToken,
 	}, 0, nil
 }
 
@@ -118,29 +103,14 @@ func (s *Service) RefreshLogin(ctx context.Context, refreshToken string) (Refres
 		return RefreshLoginResp{}, 50102, nil
 	}
 	// 更新token
-	accessToken, err := jwt.GenerateAccessToken(claims.ID, "admin", admin.RoleID, role.Code)
+	updateToken, errCode, err := s.updateToken(ctx, claims.ID, admin.RoleID, role.Code)
 	if err != nil {
-		return RefreshLoginResp{}, 60102, err
-	}
-	newRefreshToken, err := jwt.GenerateRefreshToken(claims.ID, "admin", admin.RoleID, role.Code)
-	if err != nil {
-		return RefreshLoginResp{}, 60103, err
-	}
-	if err := s.adminRepo.UpdateToken(ctx, nil, claims.ID, &newRefreshToken); err != nil {
-		return RefreshLoginResp{}, 60104, err
-	}
-	if s.rdb != nil {
-		if err := s.rdb.Set(ctx, jwt.AdminTokenKey(claims.ID), accessToken, jwt.AccessTTL()).Err(); err != nil {
-			return RefreshLoginResp{}, 60105, err
-		}
-		if err := s.rdb.Set(ctx, jwt.AdminRefreshKey(claims.ID), newRefreshToken, jwt.RefreshTTL()).Err(); err != nil {
-			return RefreshLoginResp{}, 60106, err
-		}
+		return RefreshLoginResp{}, errCode, err
 	}
 	// 返回数据
 	return RefreshLoginResp{
-		AccessToken:  accessToken,
-		RefreshToken: newRefreshToken,
+		AccessToken:  updateToken.AccessToken,
+		RefreshToken: updateToken.RefreshToken,
 	}, 0, nil
 }
 
@@ -164,32 +134,40 @@ func (s *Service) Logout(ctx context.Context, adminID uint64) (int, error) {
 }
 
 // SwitchRole 用于切换管理员角色信息
-func (s *Service) SwitchRole(ctx context.Context, adminID, roleID uint64) (int, error) {
+func (s *Service) SwitchRole(ctx context.Context, adminID, roleID uint64) (SwitchRoleResp, int, error) {
 	// 获取用户角色是否存在
 	exists, err := s.adminRoleRepo.HasRole(ctx, nil, adminID, roleID)
 	if err != nil {
-		return 60101, err
+		return SwitchRoleResp{}, 60101, err
 	}
 	if !exists {
-		return 30101, nil
+		return SwitchRoleResp{}, 30101, nil
 	}
 	// 获取角色信息
 	role, err := s.roleRepo.GetByID(ctx, nil, roleID)
 	if err != nil {
-		return 60101, err
+		return SwitchRoleResp{}, 60101, err
 	}
 	if role == nil {
-		return 50102, nil
+		return SwitchRoleResp{}, 50102, nil
 	}
 	if role.Enable != enum.EnableEnable {
-		return 40103, nil
+		return SwitchRoleResp{}, 40103, nil
 	}
 	// 变更角色
 	if err := s.adminRepo.UpdateRole(ctx, nil, adminID, roleID); err != nil {
-		return 60108, err
+		return SwitchRoleResp{}, 60108, err
+	}
+	// 更新token
+	updateToken, errCode, err := s.updateToken(ctx, adminID, roleID, role.Code)
+	if err != nil {
+		return SwitchRoleResp{}, errCode, err
 	}
 	// 返回数据
-	return 0, nil
+	return SwitchRoleResp{
+		AccessToken:  updateToken.AccessToken,
+		RefreshToken: updateToken.RefreshToken,
+	}, 0, nil
 }
 
 // ChangePassword 用于根据管理员旧密码修改密码
@@ -472,4 +450,31 @@ func (s *Service) UpdateProfile(ctx context.Context, req UpdateProfileReq) (int,
 		return 60113, err
 	}
 	return 0, nil
+}
+
+// updateToken 更新token
+func (s *Service) updateToken(ctx context.Context, adminID, roleID uint64, roleCode string) (TokenResp, int, error) {
+	accessToken, err := jwt.GenerateAccessToken(adminID, "admin", roleID, roleCode)
+	if err != nil {
+		return TokenResp{}, 60102, err
+	}
+	newRefreshToken, err := jwt.GenerateRefreshToken(adminID, "admin", roleID, roleCode)
+	if err != nil {
+		return TokenResp{}, 60103, err
+	}
+	if err := s.adminRepo.UpdateToken(ctx, nil, adminID, &newRefreshToken); err != nil {
+		return TokenResp{}, 60104, err
+	}
+	if s.rdb != nil {
+		if err := s.rdb.Set(ctx, jwt.AdminTokenKey(adminID), accessToken, jwt.AccessTTL()).Err(); err != nil {
+			return TokenResp{}, 60105, err
+		}
+		if err := s.rdb.Set(ctx, jwt.AdminRefreshKey(adminID), newRefreshToken, jwt.RefreshTTL()).Err(); err != nil {
+			return TokenResp{}, 60106, err
+		}
+	}
+	return TokenResp{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+	}, 0, nil
 }
