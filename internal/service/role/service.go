@@ -73,31 +73,20 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 }
 
 // ListAll 用于获取角色全部信息
-func (s *Service) ListAll(ctx context.Context) ([]ListPageItem, int, error) {
+func (s *Service) ListAll(ctx context.Context) ([]ListAllResp, int, error) {
 	// 获取角色
 	roles, err := s.roleRepo.FindAll(ctx, nil)
 	if err != nil {
 		return nil, 60201, err
 	}
-	// 获取菜单
-	roleIDs := make([]uint64, 0, len(roles))
-	for _, v := range roles {
-		roleIDs = append(roleIDs, v.ID)
-	}
-	menus, err := s.roleMenuRepo.GetByRoleIDs(ctx, nil, roleIDs)
-	menuIDs := make(map[uint64][]uint64)
-	for _, v := range menus {
-		menuIDs[v.RoleID] = append(menuIDs[v.RoleID], v.MenuID)
-	}
 	// 组装数据
-	list := make([]ListPageItem, 0, len(roles))
+	list := make([]ListAllResp, 0, len(roles))
 	for _, v := range roles {
-		list = append(list, ListPageItem{
-			ID:            v.ID,
-			Code:          v.Code,
-			Name:          v.Name,
-			Enable:        v.Enable == enum.EnableEnable,
-			PermissionIds: menuIDs[v.ID],
+		list = append(list, ListAllResp{
+			ID:     v.ID,
+			Code:   v.Code,
+			Name:   v.Name,
+			Enable: v.Enable == enum.EnableEnable,
 		})
 	}
 	return list, 0, nil

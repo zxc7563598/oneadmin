@@ -128,6 +128,8 @@ error:
   60111: Operation failed, please try again later # Update admin basic information failed
   60112: Operation failed, please try again later # Delete admin failed
   60113: Operation failed, please try again later # Update admin personal information failed
+  60114: Operation failed, please try again later # Failed to delete the administrator's bound role
+  60115: Operation failed, please try again later # Failed to add the bound role for the administrator
 
   60201: System busy, please try again later # Database query exception
   60202: Operation failed, please try again later # Role information modification failed

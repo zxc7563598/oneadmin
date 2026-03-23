@@ -35,10 +35,10 @@ type AdminListPageReq struct {
 // AdminSaveReq 变更管理员信息请求
 type AdminSaveReq struct {
 	ID       *uint64  `json:"id"`
-	Enable   *int     `json:"enable"`
+	Enable   *bool    `json:"enable"`
 	Username string   `json:"username" binding:"required,min=1" err:"required=10102,min=10102"`
 	Password *string  `json:"password"`
-	RoleIds  []uint64 `json:"roleIds" binding:"required,min=1" err:"required=10106,min=10108"`
+	RoleIds  []uint64 `json:"roleIds"`
 }
 
 // AdminDeleteReq 删除管理员信息请求

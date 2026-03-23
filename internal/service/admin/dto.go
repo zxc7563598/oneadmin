@@ -101,7 +101,7 @@ type DetailsProfileItem struct {
 // Save 请求入参
 type SaveReq struct {
 	ID       *uint64  `json:"id"`
-	Enable   int      `json:"enable"`
+	Enable   *bool    `json:"enable"`
 	Username string   `json:"username"`
 	Password *string  `json:"password"`
 	RoleIds  []uint64 `json:"roleIds"`

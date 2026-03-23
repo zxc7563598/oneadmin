@@ -19,6 +19,19 @@ func toRoleListItems(list []role.ListPageItem) []resp.RoleListPageItem {
 	return res
 }
 
+func toRoleListAllItems(list []role.ListAllResp) []resp.RoleListAllItem {
+	res := make([]resp.RoleListAllItem, 0, len(list))
+	for _, v := range list {
+		res = append(res, resp.RoleListAllItem{
+			ID:     v.ID,
+			Code:   v.Code,
+			Name:   v.Name,
+			Enable: v.Enable,
+		})
+	}
+	return res
+}
+
 func toRoleMenuItem(list []role.RoleMenuItem) []resp.RoleMenuItem {
 	res := make([]resp.RoleMenuItem, 0, len(list))
 	for _, v := range list {

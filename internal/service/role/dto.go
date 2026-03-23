@@ -41,6 +41,14 @@ type ListPageItem struct {
 	PermissionIds []uint64 `json:"permissionIds"`
 }
 
+// ListAll 请求返回
+type ListAllResp struct {
+	ID     uint64 `json:"id"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Enable bool   `json:"enable"`
+}
+
 // Save 请求入参
 type SaveReq struct {
 	ID      *uint64   `json:"id"`

@@ -104,7 +104,7 @@ func (h *Handler) ListAll(c *gin.Context) {
 	}
 	// 返回结果
 	response.Success(c, lang, resp.RoleListAllResp{
-		List: toRoleListItems(svcResp),
+		List: toRoleListAllItems(svcResp),
 	})
 }
 

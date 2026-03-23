@@ -342,13 +342,10 @@ func (h *Handler) Save(c *gin.Context) {
 		response.Error(c, lang, code)
 		return
 	}
-	if req.Enable == nil {
-		response.Error(c, lang, 10101)
-	}
 	// 执行请求
 	errCode, err := h.adminSvc.Save(ctx, admin.SaveReq{
 		ID:       req.ID,
-		Enable:   *req.Enable,
+		Enable:   req.Enable,
 		Username: req.Username,
 		Password: req.Password,
 		RoleIds:  req.RoleIds,

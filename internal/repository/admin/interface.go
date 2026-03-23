@@ -15,7 +15,7 @@ type Repository interface {
 	UpdateToken(ctx context.Context, tx *gorm.DB, id uint64, token *string) error
 	UpdateRole(ctx context.Context, tx *gorm.DB, adminID, roleID uint64) error
 	UpdatePassword(ctx context.Context, tx *gorm.DB, adminID uint64, password string) error
-	UpdateInfo(ctx context.Context, tx *gorm.DB, adminID uint64, Username string, Enable enum.Enable) error
+	UpdateInfo(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateInfoForm) error
 	ListPage(ctx context.Context, tx *gorm.DB, query model.AdminListQuery) ([]model.AdminListItem, int64, error)
 	UpdateProfile(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateProfileForm) error
 }
@@ -41,11 +41,16 @@ func (r *gormRepo) UpdatePassword(ctx context.Context, tx *gorm.DB, adminID uint
 }
 
 // UpdateInfo 更新管理员基本信息
-func (r *gormRepo) UpdateInfo(ctx context.Context, tx *gorm.DB, adminID uint64, Username string, Enable enum.Enable) error {
-	return r.UpdateMap(ctx, tx, "id", adminID, map[string]any{
-		"enable":   Enable,
-		"username": Username,
-	})
+func (r *gormRepo) UpdateInfo(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateInfoForm) error {
+	updateMap := make(map[string]any)
+	updateMap["username"] = form.Username
+	if form.Enable != nil {
+		updateMap["enable"] = *form.Enable
+	}
+	if form.RoleID != nil {
+		updateMap["role_id"] = *form.RoleID
+	}
+	return r.UpdateMap(ctx, tx, "id", adminID, updateMap)
 }
 
 // ListPage 获取分页列表数据

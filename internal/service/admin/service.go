@@ -2,7 +2,6 @@ package admin
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/zxc7563598/oneadmin/internal/enum"
@@ -321,62 +320,109 @@ func (s *Service) Details(ctx context.Context, adminID uint64) (DetailsResp, int
 // Save 用于创建或修改管理员信息
 func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 	// 开启事务
-	err := s.db.Transaction(func(tx *gorm.DB) error {
-		var adminID uint64
-		if req.ID == nil {
-			if req.Password == nil {
-				return fmt.Errorf("添加时密码不允许为空")
-			}
-			if len(*req.Password) < 6 {
-				return fmt.Errorf("密码长度不能少于6位")
-			}
-			if len(*req.Password) > 32 {
-				return fmt.Errorf("密码长度不能超过32位")
-			}
-			// 添加数据
-			password, err := crypto.HashPassword(*req.Password)
-			if err != nil {
-				return err
-			}
-			admin, err := s.adminRepo.Create(ctx, tx, &model.Admin{
-				Nickname: req.Username,
-				Username: req.Username,
-				Password: password,
-				RoleID:   req.RoleIds[0],
-				Gender:   enum.GenderUnknown,
-				Enable:   enum.Enable(req.Enable),
-			})
-			if err != nil {
-				return err
-			}
-			adminID = admin.ID
-		} else {
-			// 变更数据
-			adminID = *req.ID
-			if err := s.adminRepo.UpdateInfo(ctx, tx, adminID, req.Username, enum.Enable(req.Enable)); err != nil {
-				return err
-			}
+	var adminID uint64
+	var errCode int
+	var err error
+	if req.ID == nil {
+		adminID, errCode, err = s.add(ctx, req)
+		if errCode > 0 {
+			return errCode, err
 		}
+	} else {
+		adminID, errCode, err = s.update(ctx, req)
+		if errCode > 0 {
+			return errCode, err
+		}
+	}
+	errCode, err = s.bindRole(ctx, adminID, req.RoleIds)
+	if errCode > 0 {
+		return errCode, err
+	}
+	return 0, nil
+}
+
+func (s *Service) add(ctx context.Context, req SaveReq) (uint64, int, error) {
+	if req.Enable == nil {
+		return 0, 10101, nil
+	}
+	enable := enum.EnableDisable
+	if *req.Enable {
+		enable = enum.EnableEnable
+	}
+	if req.Password == nil {
+		return 0, 10103, nil
+	}
+	if len(*req.Password) < 6 {
+		return 0, 10104, nil
+	}
+	if len(*req.Password) > 32 {
+		return 0, 10105, nil
+	}
+	if len(req.RoleIds) > 0 {
+		return 0, 10108, nil
+	}
+	// 添加数据
+	password, err := crypto.HashPassword(*req.Password)
+	if err != nil {
+		return 0, 60109, err
+	}
+	admin, err := s.adminRepo.Create(ctx, nil, &model.Admin{
+		Nickname: req.Username,
+		Username: req.Username,
+		Password: password,
+		RoleID:   req.RoleIds[0],
+		Gender:   enum.GenderUnknown,
+		Enable:   enable,
+	})
+	if err != nil {
+		return 0, 60111, err
+	}
+	return admin.ID, 0, nil
+}
+
+func (s *Service) update(ctx context.Context, req SaveReq) (uint64, int, error) {
+	var enable *enum.Enable
+	if req.Enable != nil {
+		if *req.Enable {
+			val := enum.EnableEnable
+			enable = &val
+		} else {
+			val := enum.EnableDisable
+			enable = &val
+		}
+	}
+	var roleID *uint64
+	if len(req.RoleIds) > 0 {
+		roleID = &req.RoleIds[0]
+	}
+	// 变更数据
+	if err := s.adminRepo.UpdateInfo(ctx, nil, *req.ID, model.AdminUpdateInfoForm{
+		Username: req.Username,
+		Enable:   enable,
+		RoleID:   roleID,
+	}); err != nil {
+		return 0, 60111, err
+	}
+	return *req.ID, 0, nil
+}
+
+func (s *Service) bindRole(ctx context.Context, adminID uint64, roleIds []uint64) (int, error) {
+	if len(roleIds) > 0 {
 		// 删除原有角色信息
-		if err := s.adminRoleRepo.DeleteByAdminID(ctx, tx, adminID); err != nil {
-			return err
+		if err := s.adminRoleRepo.DeleteByAdminID(ctx, nil, adminID); err != nil {
+			return 60114, err
 		}
 		// 重新绑定角色信息
-		adminRoleList := make([]model.AdminRole, 0, len(req.RoleIds))
-		for _, v := range req.RoleIds {
+		adminRoleList := make([]model.AdminRole, 0, len(roleIds))
+		for _, v := range roleIds {
 			adminRoleList = append(adminRoleList, model.AdminRole{
 				AdminID: adminID,
 				RoleID:  v,
 			})
 		}
-		if err := s.adminRoleRepo.CreateBatch(ctx, tx, adminRoleList); err != nil {
-			return err
+		if err := s.adminRoleRepo.CreateBatch(ctx, nil, adminRoleList); err != nil {
+			return 60115, err
 		}
-		return nil
-	})
-
-	if err != nil {
-		return 60111, err
 	}
 	return 0, nil
 }

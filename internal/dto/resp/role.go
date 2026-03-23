@@ -16,7 +16,14 @@ type RoleListPageItem struct {
 
 // RoleListAllResp 获取全部角色请求返回
 type RoleListAllResp struct {
-	List []RoleListPageItem `json:"list"`
+	List []RoleListAllItem `json:"list"`
+}
+
+type RoleListAllItem struct {
+	ID     uint64 `json:"id"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Enable bool   `json:"enable"`
 }
 
 // RolePermissionsResp 获取管理员菜单权限树请求返回

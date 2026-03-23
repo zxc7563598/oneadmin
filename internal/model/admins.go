@@ -52,3 +52,10 @@ type AdminUpdateProfileForm struct {
 	Gender   *int
 	Avatar   *string
 }
+
+// AdminUpdateInfoForm 用于更新管理员账号信息，不对应数据库表
+type AdminUpdateInfoForm struct {
+	Username string
+	Enable   *enum.Enable
+	RoleID   *uint64
+}
