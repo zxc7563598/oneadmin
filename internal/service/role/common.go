@@ -7,6 +7,7 @@ import (
 
 	"github.com/zxc7563598/oneadmin/internal/enum"
 	"github.com/zxc7563598/oneadmin/internal/model"
+	"github.com/zxc7563598/oneadmin/pkg/jwt"
 	"gorm.io/gorm"
 )
 
@@ -116,4 +117,23 @@ func (s *Service) buildTree(list []RoleMenuItem, parentID uint64) []RoleMenuItem
 		return branch
 	}
 	return build(parentID)
+}
+
+// logout 用于退出管理员的登录
+func (s *Service) logout(ctx context.Context, adminID uint64) (int, error) {
+	// 清空用户token
+	if s.rdb != nil {
+		err := s.rdb.Del(ctx,
+			jwt.AdminTokenKey(adminID),
+			jwt.AdminRefreshKey(adminID),
+		).Err()
+		if err != nil {
+			return 60107, err
+		}
+	}
+	if err := s.adminRepo.UpdateTokenByID(ctx, nil, adminID, nil); err != nil {
+		return 60104, err
+	}
+	// 返回数据
+	return 0, nil
 }

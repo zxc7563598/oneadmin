@@ -17,7 +17,7 @@ type Services struct {
 func InitServices(repo *Repositories, db *gorm.DB, rdb *redis.Client) *Services {
 	return &Services{
 		Admin: *admin.New(repo.Admin, repo.AdminRole, repo.Role, db, rdb),
-		Role:  *role.New(repo.Role, repo.Admin, repo.RoleMenu, repo.AdminRole, repo.Menu, db),
+		Role:  *role.New(repo.Role, repo.Admin, repo.RoleMenu, repo.AdminRole, repo.Menu, db, rdb),
 		Menu:  *menu.New(repo.Menu),
 	}
 }

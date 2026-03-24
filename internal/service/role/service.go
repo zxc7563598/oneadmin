@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/zxc7563598/oneadmin/internal/enum"
 	"github.com/zxc7563598/oneadmin/internal/model"
 	"github.com/zxc7563598/oneadmin/internal/repository/admin"
@@ -21,11 +22,12 @@ type Service struct {
 	adminRoleRepo admin_role.Repository
 	menuRepo      menu.Repository
 	db            *gorm.DB
+	rdb           *redis.Client
 }
 
 const RoleCodeSuperAdmin = "SUPER_ADMIN"
 
-func New(roleRepo role.Repository, adminRepo admin.Repository, roleMenuRepo role_menu.Repository, adminRoleRepo admin_role.Repository, menuRepo menu.Repository, db *gorm.DB) *Service {
+func New(roleRepo role.Repository, adminRepo admin.Repository, roleMenuRepo role_menu.Repository, adminRoleRepo admin_role.Repository, menuRepo menu.Repository, db *gorm.DB, rdb *redis.Client) *Service {
 	return &Service{
 		roleRepo:      roleRepo,
 		adminRepo:     adminRepo,
@@ -33,6 +35,7 @@ func New(roleRepo role.Repository, adminRepo admin.Repository, roleMenuRepo role
 		adminRoleRepo: adminRoleRepo,
 		menuRepo:      menuRepo,
 		db:            db,
+		rdb:           rdb,
 	}
 }
 
@@ -218,6 +221,7 @@ func (s *Service) AddRoleUsers(ctx context.Context, roleID uint64, adminIds []ui
 		}
 		if !exists {
 			adminID = append(adminID, v)
+			s.logout(ctx, v)
 		}
 	}
 	// 批量为管理员添加角色
@@ -284,6 +288,7 @@ func (s *Service) RemoveRoleUsers(ctx context.Context, roleID uint64, adminIds [
 			if err := s.adminRepo.UpdateRoleIDByID(ctx, tx, admin.ID, newRoleID); err != nil {
 				return fmt.Errorf("更新管理员角色ID失败: %w", err)
 			}
+			s.logout(ctx, admin.ID)
 		}
 		return nil
 	})
