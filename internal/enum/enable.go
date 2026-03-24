@@ -23,3 +23,31 @@ func (e Enable) Key() string {
 func (e Enable) Text(lang string) string {
 	return i18n.T(lang, e.Key())
 }
+
+func (e Enable) IsValid() bool {
+	switch e {
+	case EnableDisable, EnableEnable:
+		return true
+	default:
+		return false
+	}
+}
+
+func BoolToEnable(b bool) Enable {
+	v := EnableDisable
+	if b {
+		v = EnableEnable
+	}
+	return v
+}
+
+func BoolToEnablePtr(b *bool) *Enable {
+	if b == nil {
+		return nil
+	}
+	v := EnableDisable
+	if *b {
+		v = EnableEnable
+	}
+	return &v
+}

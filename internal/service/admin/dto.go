@@ -58,16 +58,16 @@ type ListPageResp struct {
 }
 
 type ListPageItem struct {
-	ID        uint64            `json:"id"`
-	Username  string            `json:"username"`
-	Enable    bool              `json:"enable"`
-	Gender    int               `json:"gender"`
-	Avatar    string            `json:"avatar"`
-	Address   *string           `json:"address"`
-	Email     *string           `json:"email"`
-	Roles     []DetailsRoleItem `json:"roles"`
-	CreatedAt string            `json:"created_at"`
-	UpdatedAt string            `json:"updated_at"`
+	ID        uint64     `json:"id"`
+	Username  string     `json:"username"`
+	Enable    bool       `json:"enable"`
+	Gender    int        `json:"gender"`
+	Avatar    string     `json:"avatar"`
+	Address   string     `json:"address"`
+	Email     string     `json:"email"`
+	Roles     []RoleItem `json:"roles"`
+	CreatedAt string     `json:"created_at"`
+	UpdatedAt string     `json:"updated_at"`
 }
 
 // Details 请求返回
@@ -78,11 +78,11 @@ type DetailsResp struct {
 	CreatedAt   string             `json:"created_at"`
 	UpdatedAt   string             `json:"updated_at"`
 	Profile     DetailsProfileItem `json:"profile"`
-	Roles       []DetailsRoleItem  `json:"roles"`
-	CurrentRole DetailsRoleItem    `json:"currentRole"`
+	Roles       []RoleItem         `json:"roles"`
+	CurrentRole RoleItem           `json:"currentRole"`
 }
 
-type DetailsRoleItem struct {
+type RoleItem struct {
 	ID     uint64 `json:"id"`
 	Code   string `json:"code"`
 	Name   string `json:"name"`
@@ -102,7 +102,7 @@ type DetailsProfileItem struct {
 type SaveReq struct {
 	ID       *uint64  `json:"id"`
 	Enable   *bool    `json:"enable"`
-	Username string   `json:"username"`
+	Username *string  `json:"username"`
 	Password *string  `json:"password"`
 	RoleIds  []uint64 `json:"roleIds"`
 }

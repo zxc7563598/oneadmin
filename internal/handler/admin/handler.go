@@ -150,7 +150,7 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 		return
 	}
 	// 执行请求
-	svcResp, errCode, err := h.adminSvc.SwitchRole(ctx, adminInfo.AdminID, uint64(req.RoleID))
+	svcResp, errCode, err := h.adminSvc.SwitchRole(ctx, adminInfo.AdminID, req.Code)
 	if errCode != 0 {
 		handler.ErrorLog(
 			logger.AdminLogger,
@@ -158,7 +158,7 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 			errCode,
 			err,
 			zap.Any("adminInfo", adminInfo),
-			zap.Uint64("RoleID", uint64(req.RoleID)),
+			zap.String("req.code", req.Code),
 		)
 		response.Error(c, lang, errCode)
 		return
@@ -358,7 +358,7 @@ func (h *Handler) Save(c *gin.Context) {
 			err,
 			zap.Any("adminInfo", adminInfo),
 			zap.Any("req.id", req.ID),
-			zap.String("req.username", req.Username),
+			zap.Any("req.username", req.Username),
 			zap.Any("req.role_ids", req.RoleIds),
 		)
 		response.Error(c, lang, errCode)

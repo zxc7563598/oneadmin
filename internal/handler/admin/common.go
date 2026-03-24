@@ -24,7 +24,7 @@ func toAdminListItems(list []admin.ListPageItem) []resp.AdminListPageItem {
 	return res
 }
 
-func toAdminDetailsRoleItem(list []admin.DetailsRoleItem) []resp.AdminDetailsRoleItem {
+func toAdminDetailsRoleItem(list []admin.RoleItem) []resp.AdminDetailsRoleItem {
 	res := make([]resp.AdminDetailsRoleItem, 0, len(list))
 	for _, v := range list {
 		res = append(res, resp.AdminDetailsRoleItem{

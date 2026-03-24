@@ -20,6 +20,34 @@ func (y YesNo) Key() string {
 	}
 }
 
+func (y YesNo) IsValid() bool {
+	switch y {
+	case No, Yes:
+		return true
+	default:
+		return false
+	}
+}
+
 func (y YesNo) Text(lang string) string {
 	return i18n.T(lang, y.Key())
+}
+
+func BoolToYesNo(b bool) YesNo {
+	v := No
+	if b {
+		v = Yes
+	}
+	return v
+}
+
+func BoolToYesNoPtr(b *bool) *YesNo {
+	if b == nil {
+		return nil
+	}
+	v := No
+	if *b {
+		v = Yes
+	}
+	return &v
 }

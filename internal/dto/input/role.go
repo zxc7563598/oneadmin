@@ -21,3 +21,15 @@ type RoleSaveReq struct {
 type RoleDeleteReq struct {
 	ID uint64 `json:"id" binding:"required" err:"required=10205"`
 }
+
+// RoleAddRoleUsersReq 分配角色到管理员请求
+type RoleAddRoleUsersReq struct {
+	RoleID   uint64   `json:"roleId" binding:"required" err:"required=10205"`
+	AdminIds []uint64 `json:"adminIds" binding:"required" err:"required=10207"`
+}
+
+// RoleRemoveRoleUsersReq 分配角色到管理员请求
+type RoleRemoveRoleUsersReq struct {
+	RoleID   uint64   `json:"roleId" binding:"required" err:"required=10205"`
+	AdminIds []uint64 `json:"adminIds" binding:"required" err:"required=10207"`
+}

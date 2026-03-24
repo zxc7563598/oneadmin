@@ -202,6 +202,92 @@ func (h *Handler) Delete(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
+// AddRoleUsers 分配角色到管理员
+// POST /api/admin/roles/add-role-users
+func (h *Handler) AddRoleUsers(c *gin.Context) {
+	// 获取上下文/语言配置
+	ctx := c.Request.Context()
+	lang := i18n.GetLang(ctx)
+	// 获取管理员ID
+	adminInfo, ok := handler.GetAdminInfo(c)
+	if !ok {
+		response.Error(c, lang, 20001)
+		return
+	}
+	// 获取请求参数
+	var req input.RoleAddRoleUsersReq
+	if code, ok, err := handler.BindAndValidate(c, &req); !ok {
+		handler.ErrorLog(
+			logger.RoleLogger,
+			"AddRoleUsers 参数异常",
+			code,
+			err,
+		)
+		response.Error(c, lang, code)
+		return
+	}
+	// 执行请求
+	errCode, err := h.roleSvc.AddRoleUsers(ctx, req.RoleID, req.AdminIds)
+	if errCode != 0 {
+		handler.ErrorLog(
+			logger.RoleLogger,
+			"roleSvc.AddRoleUsers 调用失败",
+			errCode,
+			err,
+			zap.Any("adminInfo", adminInfo),
+			zap.Uint64("req.roleId", req.RoleID),
+			zap.Any("req.adminIds", req.AdminIds),
+		)
+		response.Error(c, lang, errCode)
+		return
+	}
+	// 返回结果
+	response.Success(c, lang, nil)
+}
+
+// AddRoleUsers 取消分配角色到管理员
+// POST /api/admin/roles/remove-role-users
+func (h *Handler) RemoveRoleUsers(c *gin.Context) {
+	// 获取上下文/语言配置
+	ctx := c.Request.Context()
+	lang := i18n.GetLang(ctx)
+	// 获取管理员ID
+	adminInfo, ok := handler.GetAdminInfo(c)
+	if !ok {
+		response.Error(c, lang, 20001)
+		return
+	}
+	// 获取请求参数
+	var req input.RoleRemoveRoleUsersReq
+	if code, ok, err := handler.BindAndValidate(c, &req); !ok {
+		handler.ErrorLog(
+			logger.RoleLogger,
+			"RemoveRoleUsers 参数异常",
+			code,
+			err,
+		)
+		response.Error(c, lang, code)
+		return
+	}
+	// 执行请求
+	errCode, err := h.roleSvc.RemoveRoleUsers(ctx, req.RoleID, req.AdminIds)
+	if errCode != 0 {
+		handler.ErrorLog(
+			logger.RoleLogger,
+			"roleSvc.RemoveRoleUsers 调用失败",
+			errCode,
+			err,
+			zap.Any("adminInfo", adminInfo),
+			zap.Uint64("req.roleId", req.RoleID),
+			zap.Any("req.adminIds", req.AdminIds),
+		)
+		response.Error(c, lang, errCode)
+		return
+	}
+	// 返回结果
+	response.Success(c, lang, nil)
+}
+
 // Permissions 获取管理员菜单权限树请求
 // POST /api/admin/roles/permissions
 func (h *Handler) Permissions(c *gin.Context) {

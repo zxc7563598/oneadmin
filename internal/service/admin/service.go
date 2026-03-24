@@ -125,7 +125,7 @@ func (s *Service) Logout(ctx context.Context, adminID uint64) (int, error) {
 			return 60107, err
 		}
 	}
-	if err := s.adminRepo.UpdateToken(ctx, nil, adminID, nil); err != nil {
+	if err := s.adminRepo.UpdateTokenByID(ctx, nil, adminID, nil); err != nil {
 		return 60104, err
 	}
 	// 返回数据
@@ -133,17 +133,9 @@ func (s *Service) Logout(ctx context.Context, adminID uint64) (int, error) {
 }
 
 // SwitchRole 用于切换管理员角色信息
-func (s *Service) SwitchRole(ctx context.Context, adminID, roleID uint64) (SwitchRoleResp, int, error) {
-	// 获取用户角色是否存在
-	exists, err := s.adminRoleRepo.HasRole(ctx, nil, adminID, roleID)
-	if err != nil {
-		return SwitchRoleResp{}, 60101, err
-	}
-	if !exists {
-		return SwitchRoleResp{}, 30101, nil
-	}
+func (s *Service) SwitchRole(ctx context.Context, adminID uint64, code string) (SwitchRoleResp, int, error) {
 	// 获取角色信息
-	role, err := s.roleRepo.GetByID(ctx, nil, roleID)
+	role, err := s.roleRepo.GetByCode(ctx, nil, code)
 	if err != nil {
 		return SwitchRoleResp{}, 60101, err
 	}
@@ -153,12 +145,20 @@ func (s *Service) SwitchRole(ctx context.Context, adminID, roleID uint64) (Switc
 	if role.Enable != enum.EnableEnable {
 		return SwitchRoleResp{}, 40103, nil
 	}
+	// 获取用户角色是否存在
+	exists, err := s.adminRoleRepo.ExistsByAdminIDAndRoleID(ctx, nil, adminID, role.ID)
+	if err != nil {
+		return SwitchRoleResp{}, 60101, err
+	}
+	if !exists {
+		return SwitchRoleResp{}, 30101, nil
+	}
 	// 变更角色
-	if err := s.adminRepo.UpdateRole(ctx, nil, adminID, roleID); err != nil {
+	if err := s.adminRepo.UpdateRoleIDByID(ctx, nil, adminID, role.ID); err != nil {
 		return SwitchRoleResp{}, 60108, err
 	}
 	// 更新token
-	updateToken, errCode, err := s.updateToken(ctx, adminID, roleID, role.Code)
+	updateToken, errCode, err := s.updateToken(ctx, adminID, role.ID, role.Code)
 	if err != nil {
 		return SwitchRoleResp{}, errCode, err
 	}
@@ -191,7 +191,7 @@ func (s *Service) ChangePassword(ctx context.Context, adminID uint64, oldPasswor
 	if err != nil {
 		return 60109, err
 	}
-	if err := s.adminRepo.UpdatePassword(ctx, nil, adminID, password); err != nil {
+	if err := s.adminRepo.UpdatePasswordByID(ctx, nil, adminID, password); err != nil {
 		return 60110, err
 	}
 	// 清空管理员登录状态并返回
@@ -202,7 +202,7 @@ func (s *Service) ChangePassword(ctx context.Context, adminID uint64, oldPasswor
 func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, int, error) {
 	// 获取列表数据
 	offset, limit := req.OffsetLimit()
-	admins, total, err := s.adminRepo.ListPage(ctx, nil, model.AdminListQuery{
+	admins, total, err := s.adminRepo.ListPage(ctx, nil, model.AdminListPageQuery{
 		Username: req.Username,
 		Gender:   req.Gender,
 		Enable:   req.Enable,
@@ -217,54 +217,15 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 	for _, v := range admins {
 		adminIDs = append(adminIDs, v.ID)
 	}
-	adminRoles, err := s.adminRoleRepo.GetByRoleIDs(ctx, nil, adminIDs)
-	if err != nil {
-		return ListPageResp{}, 60101, err
-	}
-	// 获取全部角色
-	roles, err := s.roleRepo.FindAll(ctx, nil)
-	if err != nil {
-		return ListPageResp{}, 60101, err
-	}
-	// 组装数据
-	roleMap := make(map[uint64]DetailsRoleItem)
-	for _, v := range roles {
-		roleMap[v.ID] = DetailsRoleItem{
-			ID:     v.ID,
-			Code:   v.Code,
-			Name:   v.Name,
-			Enable: v.Enable == enum.EnableEnable,
-		}
-	}
-	//
-	adminRoleMap := make(map[uint64][]DetailsRoleItem)
-	for _, ar := range adminRoles {
-		role, ok := roleMap[ar.RoleID]
-		if !ok {
-			continue
-		}
-		adminRoleMap[ar.AdminID] = append(adminRoleMap[ar.AdminID], role)
-	}
-	respList := make([]ListPageItem, 0, len(admins))
-	for _, v := range admins {
-		item := ListPageItem{
-			ID:        v.ID,
-			Username:  v.Username,
-			Enable:    v.Enable == enum.EnableEnable,
-			Gender:    int(v.Gender),
-			Avatar:    v.Avatar,
-			Address:   v.Address,
-			Email:     v.Email,
-			Roles:     adminRoleMap[v.ID],
-			CreatedAt: timeutil.Format(v.CreatedAt),
-			UpdatedAt: timeutil.Format(v.UpdatedAt),
-		}
-		respList = append(respList, item)
+	// 获取角色映射
+	adminRoleMap, errCode, err := s.getAdminRolesMap(ctx)
+	if errCode > 0 {
+		return ListPageResp{}, errCode, err
 	}
 	// 返回数据
 	return ListPageResp{
 		Total:    total,
-		PageData: respList,
+		PageData: toListPageItems(admins, adminRoleMap),
 	}, 0, nil
 }
 
@@ -278,16 +239,16 @@ func (s *Service) Details(ctx context.Context, adminID uint64) (DetailsResp, int
 	if admin == nil {
 		return DetailsResp{}, 50101, nil
 	}
-	// 获取角色信息
-	roles, err := s.roleRepo.FindEnabled(ctx, nil)
+	// 获取所有启用的角色
+	roles, err := s.roleRepo.ListEnabled(ctx, nil)
 	if err != nil {
 		return DetailsResp{}, 60101, err
 	}
 	// 组装参数
-	roleList := make([]DetailsRoleItem, 0, len(roles))
-	var currentRole DetailsRoleItem
+	roleList := make([]RoleItem, 0, len(roles))
+	var currentRole RoleItem
 	for _, v := range roles {
-		item := DetailsRoleItem{
+		item := RoleItem{
 			ID:     v.ID,
 			Code:   v.Code,
 			Name:   v.Name,
@@ -298,6 +259,7 @@ func (s *Service) Details(ctx context.Context, adminID uint64) (DetailsResp, int
 			currentRole = item
 		}
 	}
+	// 返回数据
 	return DetailsResp{
 		ID:        admin.ID,
 		Username:  admin.Username,
@@ -323,7 +285,8 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 	var adminID uint64
 	var errCode int
 	var err error
-	if req.ID == nil {
+	isCreate := req.ID == nil || *req.ID == 0
+	if isCreate {
 		adminID, errCode, err = s.add(ctx, req)
 		if errCode > 0 {
 			return errCode, err
@@ -334,97 +297,13 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 			return errCode, err
 		}
 	}
-	errCode, err = s.bindRole(ctx, adminID, req.RoleIds)
+	// 绑定角色身份
+	errCode, err = s.bindRoles(ctx, adminID, req.RoleIds)
 	if errCode > 0 {
 		return errCode, err
 	}
-	return 0, nil
-}
-
-func (s *Service) add(ctx context.Context, req SaveReq) (uint64, int, error) {
-	if req.Enable == nil {
-		return 0, 10101, nil
-	}
-	enable := enum.EnableDisable
-	if *req.Enable {
-		enable = enum.EnableEnable
-	}
-	if req.Password == nil {
-		return 0, 10103, nil
-	}
-	if len(*req.Password) < 6 {
-		return 0, 10104, nil
-	}
-	if len(*req.Password) > 32 {
-		return 0, 10105, nil
-	}
-	if len(req.RoleIds) > 0 {
-		return 0, 10108, nil
-	}
-	// 添加数据
-	password, err := crypto.HashPassword(*req.Password)
-	if err != nil {
-		return 0, 60109, err
-	}
-	admin, err := s.adminRepo.Create(ctx, nil, &model.Admin{
-		Nickname: req.Username,
-		Username: req.Username,
-		Password: password,
-		RoleID:   req.RoleIds[0],
-		Gender:   enum.GenderUnknown,
-		Enable:   enable,
-	})
-	if err != nil {
-		return 0, 60111, err
-	}
-	return admin.ID, 0, nil
-}
-
-func (s *Service) update(ctx context.Context, req SaveReq) (uint64, int, error) {
-	var enable *enum.Enable
-	if req.Enable != nil {
-		if *req.Enable {
-			val := enum.EnableEnable
-			enable = &val
-		} else {
-			val := enum.EnableDisable
-			enable = &val
-		}
-	}
-	var roleID *uint64
-	if len(req.RoleIds) > 0 {
-		roleID = &req.RoleIds[0]
-	}
-	// 变更数据
-	if err := s.adminRepo.UpdateInfo(ctx, nil, *req.ID, model.AdminUpdateInfoForm{
-		Username: req.Username,
-		Enable:   enable,
-		RoleID:   roleID,
-	}); err != nil {
-		return 0, 60111, err
-	}
-	return *req.ID, 0, nil
-}
-
-func (s *Service) bindRole(ctx context.Context, adminID uint64, roleIds []uint64) (int, error) {
-	if len(roleIds) > 0 {
-		// 删除原有角色信息
-		if err := s.adminRoleRepo.DeleteByAdminID(ctx, nil, adminID); err != nil {
-			return 60114, err
-		}
-		// 重新绑定角色信息
-		adminRoleList := make([]model.AdminRole, 0, len(roleIds))
-		for _, v := range roleIds {
-			adminRoleList = append(adminRoleList, model.AdminRole{
-				AdminID: adminID,
-				RoleID:  v,
-			})
-		}
-		if err := s.adminRoleRepo.CreateBatch(ctx, nil, adminRoleList); err != nil {
-			return 60115, err
-		}
-	}
-	return 0, nil
+	// 退出对应的管理员
+	return s.Logout(ctx, adminID)
 }
 
 // Delete 用于删除管理员信息
@@ -436,6 +315,11 @@ func (s *Service) Delete(ctx context.Context, adminID uint64) (int, error) {
 	}
 	if admin == nil {
 		return 50101, nil
+	}
+	// 踢出登录
+	errCode, err := s.Logout(ctx, adminID)
+	if errCode > 0 {
+		return errCode, err
 	}
 	// 开启事务，删除管理员
 	err = s.db.Transaction(func(tx *gorm.DB) error {
@@ -468,7 +352,7 @@ func (s *Service) ResetAdminPassword(ctx context.Context, adminID uint64, newPas
 	if err != nil {
 		return 60109, err
 	}
-	if err := s.adminRepo.UpdatePassword(ctx, nil, adminID, password); err != nil {
+	if err := s.adminRepo.UpdatePasswordByID(ctx, nil, adminID, password); err != nil {
 		return 60110, err
 	}
 	// 清空管理员登录状态并返回
@@ -486,7 +370,7 @@ func (s *Service) UpdateProfile(ctx context.Context, req UpdateProfileReq) (int,
 		return 50101, nil
 	}
 	// 变更管理员信息
-	if err := s.adminRepo.UpdateProfile(ctx, nil, req.ID, model.AdminUpdateProfileForm{
+	if err := s.adminRepo.UpdateProfileByID(ctx, nil, req.ID, model.AdminUpdateProfileByIdForm{
 		Nickname: req.Nickname,
 		Email:    req.Email,
 		Address:  req.Address,
@@ -496,31 +380,4 @@ func (s *Service) UpdateProfile(ctx context.Context, req UpdateProfileReq) (int,
 		return 60113, err
 	}
 	return 0, nil
-}
-
-// updateToken 更新token
-func (s *Service) updateToken(ctx context.Context, adminID, roleID uint64, roleCode string) (TokenResp, int, error) {
-	accessToken, err := jwt.GenerateAccessToken(adminID, "admin", roleID, roleCode)
-	if err != nil {
-		return TokenResp{}, 60102, err
-	}
-	newRefreshToken, err := jwt.GenerateRefreshToken(adminID, "admin", roleID, roleCode)
-	if err != nil {
-		return TokenResp{}, 60103, err
-	}
-	if err := s.adminRepo.UpdateToken(ctx, nil, adminID, &newRefreshToken); err != nil {
-		return TokenResp{}, 60104, err
-	}
-	if s.rdb != nil {
-		if err := s.rdb.Set(ctx, jwt.AdminTokenKey(adminID), accessToken, jwt.AccessTTL()).Err(); err != nil {
-			return TokenResp{}, 60105, err
-		}
-		if err := s.rdb.Set(ctx, jwt.AdminRefreshKey(adminID), newRefreshToken, jwt.RefreshTTL()).Err(); err != nil {
-			return TokenResp{}, 60106, err
-		}
-	}
-	return TokenResp{
-		AccessToken:  accessToken,
-		RefreshToken: newRefreshToken,
-	}, 0, nil
 }

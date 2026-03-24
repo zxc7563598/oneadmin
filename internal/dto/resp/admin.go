@@ -18,8 +18,8 @@ type AdminListPageItem struct {
 	Enable    bool                   `json:"enable"`
 	Gender    int                    `json:"gender"`
 	Avatar    string                 `json:"avatar"`
-	Address   *string                `json:"address"`
-	Email     *string                `json:"email"`
+	Address   string                 `json:"address"`
+	Email     string                 `json:"email"`
 	Roles     []AdminDetailsRoleItem `json:"roles"`
 	CreatedAt string                 `json:"createdAt"`
 	UpdatedAt string                 `json:"updatedAt"`

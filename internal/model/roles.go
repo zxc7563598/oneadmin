@@ -14,8 +14,8 @@ func (Role) TableName() string {
 	return "roles"
 }
 
-// RoleListQuery 用于后台列表查询入参，不对应数据库表
-type RoleListQuery struct {
+// RoleListPageQuery 用于后台列表查询入参，不对应数据库表
+type RoleListPageQuery struct {
 	Offset int
 	Limit  int
 	Name   *string
@@ -30,9 +30,9 @@ type RoleListItem struct {
 	Enable enum.Enable
 }
 
-// RoleForm 用于更新角色资料，不对应数据库表
-type RoleForm struct {
+// RoleUpdateByIdForm 用于更新角色资料，不对应数据库表
+type RoleUpdateByIdForm struct {
 	Code   *string
 	Name   *string
-	Enable enum.Enable
+	Enable *enum.Enable
 }

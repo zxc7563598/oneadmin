@@ -21,8 +21,8 @@ func (Admin) TableName() string {
 	return "admins"
 }
 
-// AdminListQuery 用于后台列表查询入参，不对应数据库表
-type AdminListQuery struct {
+// AdminListPageQuery 用于后台列表查询入参，不对应数据库表
+type AdminListPageQuery struct {
 	Username *string
 	Gender   *int
 	Enable   *int
@@ -44,8 +44,8 @@ type AdminListItem struct {
 	UpdatedAt int64
 }
 
-// AdminUpdateProfileForm 用于更新管理员个人资料，不对应数据库表
-type AdminUpdateProfileForm struct {
+// AdminUpdateProfileByIdForm 用于更新管理员个人资料，不对应数据库表
+type AdminUpdateProfileByIdForm struct {
 	Nickname *string
 	Email    *string
 	Address  *string
@@ -53,9 +53,9 @@ type AdminUpdateProfileForm struct {
 	Avatar   *string
 }
 
-// AdminUpdateInfoForm 用于更新管理员账号信息，不对应数据库表
-type AdminUpdateInfoForm struct {
-	Username string
+// AdminUpdateBasicInfoByIdForm 用于更新管理员账号信息，不对应数据库表
+type AdminUpdateBasicInfoByIdForm struct {
+	Username *string
 	Enable   *enum.Enable
 	RoleID   *uint64
 }

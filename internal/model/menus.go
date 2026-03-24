@@ -23,8 +23,8 @@ func (Menu) TableName() string {
 	return "menus"
 }
 
-// MenuUpdateInfoForm 用于更新菜单基本信息，不对应数据库表
-type MenuUpdateInfoForm struct {
+// MenuUpdateByIdForm 用于更新菜单基本信息，不对应数据库表
+type MenuUpdateByIdForm struct {
 	Code      string        `json:"code"`
 	Enable    enum.Enable   `json:"enable"`
 	Show      enum.YesNo    `json:"show"`

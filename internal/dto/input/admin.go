@@ -14,7 +14,7 @@ type AdminRefreshReq struct {
 
 // AdminSwitchRoleReq 切换管理员角色请求
 type AdminSwitchRoleReq struct {
-	RoleID int `json:"roleID" binding:"required" err:"required=10106"`
+	Code string `json:"code" binding:"required" err:"required=10106"`
 }
 
 // AdminChangePasswordReq 根据旧密码变更新密码请求
@@ -36,7 +36,7 @@ type AdminListPageReq struct {
 type AdminSaveReq struct {
 	ID       *uint64  `json:"id"`
 	Enable   *bool    `json:"enable"`
-	Username string   `json:"username" binding:"required,min=1" err:"required=10102,min=10102"`
+	Username *string  `json:"username" binding:"required,min=1" err:"required=10102,min=10102"`
 	Password *string  `json:"password"`
 	RoleIds  []uint64 `json:"roleIds"`
 }

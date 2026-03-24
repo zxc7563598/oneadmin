@@ -24,3 +24,12 @@ func (g Gender) Key() string {
 func (g Gender) Text(lang string) string {
 	return i18n.T(lang, g.Key())
 }
+
+func (g Gender) IsValid() bool {
+	switch g {
+	case GenderUnknown, GenderMale, GenderFemale:
+		return true
+	default:
+		return false
+	}
+}

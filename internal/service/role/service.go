@@ -2,11 +2,12 @@ package role
 
 import (
 	"context"
-	"errors"
-	"sort"
+	"fmt"
 
 	"github.com/zxc7563598/oneadmin/internal/enum"
 	"github.com/zxc7563598/oneadmin/internal/model"
+	"github.com/zxc7563598/oneadmin/internal/repository/admin"
+	"github.com/zxc7563598/oneadmin/internal/repository/admin_role"
 	"github.com/zxc7563598/oneadmin/internal/repository/menu"
 	"github.com/zxc7563598/oneadmin/internal/repository/role"
 	"github.com/zxc7563598/oneadmin/internal/repository/role_menu"
@@ -14,20 +15,24 @@ import (
 )
 
 type Service struct {
-	roleRepo     role.Repository
-	roleMenuRepo role_menu.Repository
-	menuRepo     menu.Repository
-	db           *gorm.DB
+	roleRepo      role.Repository
+	adminRepo     admin.Repository
+	roleMenuRepo  role_menu.Repository
+	adminRoleRepo admin_role.Repository
+	menuRepo      menu.Repository
+	db            *gorm.DB
 }
 
 const RoleCodeSuperAdmin = "SUPER_ADMIN"
 
-func New(roleRepo role.Repository, roleMenuRepo role_menu.Repository, menuRepo menu.Repository, db *gorm.DB) *Service {
+func New(roleRepo role.Repository, adminRepo admin.Repository, roleMenuRepo role_menu.Repository, adminRoleRepo admin_role.Repository, menuRepo menu.Repository, db *gorm.DB) *Service {
 	return &Service{
-		roleRepo:     roleRepo,
-		roleMenuRepo: roleMenuRepo,
-		menuRepo:     menuRepo,
-		db:           db,
+		roleRepo:      roleRepo,
+		adminRepo:     adminRepo,
+		roleMenuRepo:  roleMenuRepo,
+		adminRoleRepo: adminRoleRepo,
+		menuRepo:      menuRepo,
+		db:            db,
 	}
 }
 
@@ -35,7 +40,7 @@ func New(roleRepo role.Repository, roleMenuRepo role_menu.Repository, menuRepo m
 func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, int, error) {
 	// 获取列表数据
 	offset, limit := req.OffsetLimit()
-	roles, total, err := s.roleRepo.ListPage(ctx, nil, model.RoleListQuery{
+	roles, total, err := s.roleRepo.ListPage(ctx, nil, model.RoleListPageQuery{
 		Name:   req.Name,
 		Enable: req.Enable,
 		Offset: offset,
@@ -49,9 +54,9 @@ func (s *Service) ListPage(ctx context.Context, req ListPageReq) (ListPageResp, 
 	for _, v := range roles {
 		roleIDs = append(roleIDs, v.ID)
 	}
-	menus, err := s.roleMenuRepo.GetByRoleIDs(ctx, nil, roleIDs)
+	roleMenus, err := s.roleMenuRepo.ListByRoleIDs(ctx, nil, roleIDs)
 	menuIDs := make(map[uint64][]uint64)
-	for _, v := range menus {
+	for _, v := range roleMenus {
 		menuIDs[v.RoleID] = append(menuIDs[v.RoleID], v.MenuID)
 	}
 	// 组装数据
@@ -97,7 +102,14 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 	// 开启事务
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// 变更角色信息
-		roleID, err := s.saveRole(ctx, tx, req)
+		var roleID uint64
+		var err error
+		isCreate := req.ID == nil || *req.ID == 0
+		if isCreate {
+			roleID, err = s.add(ctx, tx, req)
+		} else {
+			roleID, err = s.update(ctx, tx, req)
+		}
 		if err != nil {
 			return err
 		}
@@ -113,67 +125,6 @@ func (s *Service) Save(ctx context.Context, req SaveReq) (int, error) {
 		return 60202, err
 	}
 	return 0, nil
-}
-
-// saveRole 用于变更角色信息
-func (s *Service) saveRole(ctx context.Context, tx *gorm.DB, req SaveReq) (uint64, error) {
-
-	enable := enum.EnableDisable
-	if req.Enable != nil {
-		if *req.Enable {
-			enable = enum.EnableEnable
-		}
-	}
-	if req.ID == nil {
-		// 新增
-		if req.Code == nil || req.Name == nil {
-			return 0, errors.New("missing required fields")
-		}
-		role, err := s.roleRepo.Create(ctx, tx, &model.Role{
-			Code:   *req.Code,
-			Name:   *req.Name,
-			Enable: enable,
-		})
-		if err != nil {
-			return 0, err
-		}
-		return role.ID, nil
-	}
-	// 更新
-	roleID := *req.ID
-	if err := s.roleRepo.UpdateByID(ctx, tx, roleID, model.RoleForm{
-		Code:   req.Code,
-		Name:   req.Name,
-		Enable: enable,
-	}); err != nil {
-		return 0, err
-	}
-	return roleID, nil
-}
-
-// resetRoleMenus 用于重新绑定角色对应的权限
-func (s *Service) resetRoleMenus(ctx context.Context, tx *gorm.DB, roleID uint64, menuIDs []uint64) error {
-	// 删除旧关系
-	if err := s.roleMenuRepo.DeleteByRoleID(ctx, tx, roleID); err != nil {
-		return err
-	}
-	// 没有菜单，直接结束
-	if len(menuIDs) == 0 {
-		return nil
-	}
-	// 构建新关系
-	roleMenus := make([]model.RoleMenu, 0, len(menuIDs))
-	for _, v := range menuIDs {
-		roleMenus = append(roleMenus, model.RoleMenu{
-			RoleID: roleID,
-			MenuID: v,
-		})
-	}
-	// 批量插入
-	if err := s.roleMenuRepo.CreateBatch(ctx, tx, roleMenus); err != nil {
-		return err
-	}
-	return nil
 }
 
 // Delete 用于删除角色信息
@@ -233,47 +184,111 @@ func (s *Service) RoleMenuTree(ctx context.Context, roleID uint64, roleCode stri
 	return s.buildTree(list, 0), 0, nil
 }
 
-// getMenusByRole 用于获取指定角色拥有的菜单
-func (s *Service) getMenusByRole(ctx context.Context, roleID uint64, roleCode string) ([]model.Menu, error) {
-	// 超级管理员默认拥有全部菜单
-	if roleCode == RoleCodeSuperAdmin {
-		return s.menuRepo.GetEnableAll(ctx, nil)
-	}
-	// 非超管，根据角色ID获取菜单
-	roleMenus, err := s.roleMenuRepo.GetByRoleID(ctx, nil, roleID)
+// AddRoleUsers 用于分配角色到管理员
+func (s *Service) AddRoleUsers(ctx context.Context, roleID uint64, adminIds []uint64) (int, error) {
+	// 获取角色信息
+	role, err := s.roleRepo.GetByID(ctx, nil, roleID)
 	if err != nil {
-		return nil, err
+		return 60201, err
 	}
-	menuIDs := make([]uint64, 0, len(roleMenus))
-	for _, v := range roleMenus {
-		menuIDs = append(menuIDs, v.MenuID)
+	if role == nil {
+		return 50201, nil
 	}
-	if len(menuIDs) == 0 {
-		return nil, nil
+	if role.Enable == enum.EnableDisable {
+		return 40202, nil
 	}
-	return s.menuRepo.GetEnableByID(ctx, nil, menuIDs)
+	// 检查传入的管理员信息
+	adminID := make([]uint64, 0, len(adminIds))
+	for _, v := range adminIds {
+		admin, err := s.adminRepo.GetByID(ctx, nil, v)
+		if err != nil {
+			continue
+		}
+		if admin == nil {
+			continue
+		}
+		// 兜底: 如果管理员没有角色就分配角色
+		if admin.RoleID == 0 {
+			s.adminRepo.UpdateRoleIDByID(ctx, nil, v, roleID)
+		}
+		// 获取管理员是否拥有角色
+		exists, err := s.adminRoleRepo.ExistsByAdminIDAndRoleID(ctx, nil, v, roleID)
+		if err != nil {
+			continue
+		}
+		if !exists {
+			adminID = append(adminID, v)
+		}
+	}
+	// 批量为管理员添加角色
+	err = s.adminRoleRepo.BindRoles(ctx, nil, adminID, roleID)
+	if err != nil {
+		return 60206, err
+	}
+	return 0, nil
 }
 
-// buildTree 用于获取菜单权限树
-func (s *Service) buildTree(list []RoleMenuItem, parentID uint64) []RoleMenuItem {
-	// 构建 parent -> children map
-	childrenMap := make(map[uint64][]RoleMenuItem)
-	for _, el := range list {
-		childrenMap[el.ParentID] = append(childrenMap[el.ParentID], el)
+// RemoveRoleUsers 用于取消分配角色到管理员
+func (s *Service) RemoveRoleUsers(ctx context.Context, roleID uint64, adminIds []uint64) (int, error) {
+	if len(adminIds) == 0 {
+		return 0, nil
 	}
-	// 递归
-	var build func(pid uint64) []RoleMenuItem
-	build = func(pid uint64) []RoleMenuItem {
-		branch := childrenMap[pid]
-		// 排序
-		sort.Slice(branch, func(i, j int) bool {
-			return branch[i].Order < branch[j].Order
-		})
-		// 构建 children
-		for i := range branch {
-			branch[i].Children = build(branch[i].ID)
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// 查所有管理员
+		admins, err := s.adminRepo.GetByIDs(ctx, tx, adminIds)
+		if err != nil {
+			return fmt.Errorf("获取管理员失败: %w", err)
 		}
-		return branch
+		// 查所有角色关系（一次性查，避免 N+1）
+		adminRoles, err := s.adminRoleRepo.ListByAdminIDs(ctx, tx, adminIds)
+		if err != nil {
+			return fmt.Errorf("获取多个管理员的所有角色失败: %w", err)
+		}
+		// 构建 map：adminID -> []roleID
+		roleMap := make(map[uint64][]uint64, len(adminIds))
+		for _, ar := range adminRoles {
+			roleMap[ar.AdminID] = append(roleMap[ar.AdminID], ar.RoleID)
+		}
+		// 校验：是否会出现“无角色”
+		for _, admin := range admins {
+			roles := roleMap[admin.ID]
+			// 统计删除后剩余角色数量
+			remain := 0
+			for _, r := range roles {
+				if r != roleID {
+					remain++
+				}
+			}
+			if remain == 0 {
+				return fmt.Errorf("管理员 %d 仅拥有此角色，无法删除", admin.ID)
+			}
+		}
+		// 删除角色关系
+		if err := s.adminRoleRepo.UnbindRoles(ctx, tx, adminIds, roleID); err != nil {
+			return fmt.Errorf("删除管理员绑定角色失败: %w", err)
+		}
+		// 处理需要切换当前角色的管理员
+		for _, admin := range admins {
+			if admin.RoleID != roleID {
+				continue
+			}
+			roles := roleMap[admin.ID]
+			// 找一个新的 role（排除被删除的）
+			var newRoleID uint64
+			for _, r := range roles {
+				if r != roleID {
+					newRoleID = r
+					break
+				}
+			}
+			if err := s.adminRepo.UpdateRoleIDByID(ctx, tx, admin.ID, newRoleID); err != nil {
+				return fmt.Errorf("更新管理员角色ID失败: %w", err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return 60206, err
 	}
-	return build(parentID)
+	return 0, nil
 }

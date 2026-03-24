@@ -20,6 +20,15 @@ func (m MenuType) Key() string {
 	}
 }
 
+func (m MenuType) IsValid() bool {
+	switch m {
+	case MenuTypeButton, MenuTypeMenu:
+		return true
+	default:
+		return false
+	}
+}
+
 func (m MenuType) Text(lang string) string {
 	return i18n.T(lang, m.Key())
 }

@@ -11,27 +11,36 @@ import (
 
 type Repository interface {
 	base.Repository[model.Role]
-	FindEnabled(ctx context.Context, tx *gorm.DB) ([]model.Role, error)
-	ListPage(ctx context.Context, tx *gorm.DB, query model.RoleListQuery) ([]model.RoleListItem, int64, error)
-	UpdateByID(ctx context.Context, tx *gorm.DB, id uint64, queue model.RoleForm) error
+	GetByCode(ctx context.Context, tx *gorm.DB, code string) (*model.Role, error)
+	ListEnabled(ctx context.Context, tx *gorm.DB) ([]model.Role, error)
+	ListPage(ctx context.Context, tx *gorm.DB, query model.RoleListPageQuery) ([]model.RoleListItem, int64, error)
+	UpdateByID(ctx context.Context, tx *gorm.DB, id uint64, queue model.RoleUpdateByIdForm) error
 }
 
-// FindEnabled 获取全部启用数据
-func (r *gormRepo) FindEnabled(ctx context.Context, tx *gorm.DB) ([]model.Role, error) {
+// GetByCode 根据 code 获取单条数据
+func (r *gormRepo) GetByCode(ctx context.Context, tx *gorm.DB, code string) (*model.Role, error) {
+	return r.FindOneByField(ctx, tx, "code", code)
+}
+
+// ListEnabled 获取全部启用数据
+func (r *gormRepo) ListEnabled(ctx context.Context, tx *gorm.DB) ([]model.Role, error) {
 	return r.FindByField(ctx, tx, "enable", enum.EnableEnable)
 }
 
 // ListPage 获取分页列表数据
-func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.RoleListQuery) ([]model.RoleListItem, int64, error) {
+func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.RoleListPageQuery) ([]model.RoleListItem, int64, error) {
 	var list []model.RoleListItem
 	var total int64
 	db := r.getDB(ctx, tx)
 	db = db.Model(&model.Role{})
-	if query.Name != nil && *query.Name != "" {
-		db = db.Where("name LIKE ?", "%"+*query.Name+"%")
+	if v := query.Name; v != nil && *v != "" {
+		db = db.Where("name LIKE ?", "%"+*v+"%")
 	}
-	if query.Enable != nil {
-		db = db.Where("enable = ?", *query.Enable)
+	if v := query.Enable; v != nil {
+		e := enum.Enable(*v)
+		if e.IsValid() {
+			db = db.Where("enable = ?", e)
+		}
 	}
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -44,14 +53,22 @@ func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.RoleLi
 }
 
 // UpdateByID 变更基本信息
-func (r *gormRepo) UpdateByID(ctx context.Context, tx *gorm.DB, id uint64, queue model.RoleForm) error {
+func (r *gormRepo) UpdateByID(ctx context.Context, tx *gorm.DB, id uint64, form model.RoleUpdateByIdForm) error {
 	updateMap := make(map[string]any)
-	if queue.Code != nil {
-		updateMap["code"] = *queue.Code
+	if v := form.Code; v != nil && *v != "" {
+		updateMap["code"] = *v
 	}
-	if queue.Name != nil {
-		updateMap["name"] = *queue.Name
+	if v := form.Name; v != nil && *v != "" {
+		updateMap["name"] = *v
 	}
-	updateMap["enable"] = queue.Enable
+	if v := form.Enable; v != nil {
+		e := enum.Enable(*v)
+		if e.IsValid() {
+			updateMap["enable"] = e
+		}
+	}
+	if len(updateMap) == 0 {
+		return nil
+	}
 	return r.UpdateMap(ctx, tx, "id", id, updateMap)
 }

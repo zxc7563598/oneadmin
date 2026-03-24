@@ -71,13 +71,14 @@
 error:
   0: Operation successful # success
 
-  10001: Invalid request parameters # Parameter validation failed
-  10002: Login status abnormal, please log in again # refreshToken parse failed
-  10003: Login status abnormal, please log in again # refreshToken data异常
-  10004: Login status abnormal, please log in again # Authorization header not detected
-  10005: Login status abnormal, please log in again # Authorization parse failed
-  10006: Login status abnormal, please log in again # accessToken parse failed
-  10007: Login status abnormal, please log in again # accessToken data异常
+  10001: Request parameter is invalid # Parameter verification failed (generic)
+  10002: Login status is abnormal, please log in again # accessToken parsing failed
+  10003: Login status is abnormal. Please log in again. # accessToken data is abnormal
+  10004: Login status is abnormal, please login again # Authorization request header not detected
+  10005: Login status is abnormal, please log in again # Authorization parsing failed
+  10006: Login status is abnormal, please log in again # Redis accessToken parsing failed
+  10007: Login status is abnormal, please log in again # Redis accessToken data is abnormal
+  10008: Login status is abnormal, please log in again # Redis accessToken has been refreshed
 
   10101: Invalid request parameters # Parameter validation failed
   10102: Please enter account # Account cannot be empty
@@ -94,6 +95,7 @@ error:
   10204: Please select a role status # The role status cannot be empty
   10205: Please select a role # Role ID cannot be empty
   10206: Please assign at least one menu to this role. # A role must be bound to at least one menu
+  10207: Please select a admin # Admin ID cannot be empty
 
   10301: Request parameter is invalid # Parameter verification failed
   10302: Please enter path information # Path information cannot be empty
@@ -109,6 +111,9 @@ error:
   40102: Account unavailable # Admin account disabled
   40103: Role unavailable # Role disabled
   40104: New password cannot be the same as the old password # Old and new passwords match
+
+  40201: Binding failed, the administrator has already bound this role. # The current administrator already possesses this role
+  40202: Binding failed, current role is unavailable # The current role has been deactivated
 
   50101: Admin does not exist or has been deleted # Admin information not found in database
   50102: Role does not exist or has been deleted # Role information not found in database
@@ -136,6 +141,7 @@ error:
   60203: Operation failed, please try again later # Role deletion failed
   60204: Operation failed, please try again later # Failed to obtain permission menu based on role
   60205: Operation failed, please try again later # Menu information retrieval failed
+  60206: Operation failed, please try again later # Role binding to the administrator failed
 
   60301: System is busy, please try again later # Database query exception
   60302: Operation failed, please try again later # Menu information addition failed

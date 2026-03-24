@@ -12,12 +12,12 @@ import (
 type Repository interface {
 	base.Repository[model.Admin]
 	GetByUsername(ctx context.Context, tx *gorm.DB, username string) (*model.Admin, error)
-	UpdateToken(ctx context.Context, tx *gorm.DB, id uint64, token *string) error
-	UpdateRole(ctx context.Context, tx *gorm.DB, adminID, roleID uint64) error
-	UpdatePassword(ctx context.Context, tx *gorm.DB, adminID uint64, password string) error
-	UpdateInfo(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateInfoForm) error
-	ListPage(ctx context.Context, tx *gorm.DB, query model.AdminListQuery) ([]model.AdminListItem, int64, error)
-	UpdateProfile(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateProfileForm) error
+	UpdateTokenByID(ctx context.Context, tx *gorm.DB, id uint64, token *string) error
+	UpdatePasswordByID(ctx context.Context, tx *gorm.DB, adminID uint64, password string) error
+	UpdateBasicInfoByID(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateBasicInfoByIdForm) error
+	UpdateRoleIDByID(ctx context.Context, tx *gorm.DB, adminID uint64, roleID uint64) error
+	ListPage(ctx context.Context, tx *gorm.DB, query model.AdminListPageQuery) ([]model.AdminListItem, int64, error)
+	UpdateProfileByID(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateProfileByIdForm) error
 }
 
 // GetByUsername 根据 username 获取账号信息
@@ -25,48 +25,62 @@ func (r *gormRepo) GetByUsername(ctx context.Context, tx *gorm.DB, username stri
 	return r.FindOneByField(ctx, tx, "username", username)
 }
 
-// UpdateToken 根据 id 更换管理员 refreshToken
-func (r *gormRepo) UpdateToken(ctx context.Context, tx *gorm.DB, id uint64, token *string) error {
+// UpdateTokenByID 根据 id 更换管理员 refreshToken
+func (r *gormRepo) UpdateTokenByID(ctx context.Context, tx *gorm.DB, id uint64, token *string) error {
 	return r.UpdateField(ctx, tx, id, "token", token)
 }
 
-// UpdateRole 设置管理员的角色
-func (r *gormRepo) UpdateRole(ctx context.Context, tx *gorm.DB, adminID, roleID uint64) error {
-	return r.UpdateField(ctx, tx, adminID, "role_id", roleID)
+// UpdatePasswordByID 更新管理员密码
+func (r *gormRepo) UpdatePasswordByID(ctx context.Context, tx *gorm.DB, id uint64, password string) error {
+	return r.UpdateField(ctx, tx, id, "password", password)
 }
 
-// UpdatePassword 更新管理员密码
-func (r *gormRepo) UpdatePassword(ctx context.Context, tx *gorm.DB, adminID uint64, password string) error {
-	return r.UpdateField(ctx, tx, adminID, "password", password)
+// UpdateRoleIDByID 更新管理员角色信息
+func (r *gormRepo) UpdateRoleIDByID(ctx context.Context, tx *gorm.DB, id uint64, roleID uint64) error {
+	return r.UpdateField(ctx, tx, id, "role_id", roleID)
 }
 
-// UpdateInfo 更新管理员基本信息
-func (r *gormRepo) UpdateInfo(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateInfoForm) error {
-	updateMap := make(map[string]any)
-	updateMap["username"] = form.Username
-	if form.Enable != nil {
-		updateMap["enable"] = *form.Enable
+// UpdateBasicInfoByID 更新管理员基本信息
+func (r *gormRepo) UpdateBasicInfoByID(ctx context.Context, tx *gorm.DB, id uint64, form model.AdminUpdateBasicInfoByIdForm) error {
+	updateMap := make(map[string]any, 3)
+	if v := form.Username; v != nil && *v != "" {
+		updateMap["username"] = *v
 	}
-	if form.RoleID != nil {
-		updateMap["role_id"] = *form.RoleID
+	if v := form.RoleID; v != nil && *v != 0 {
+		updateMap["role_id"] = *v
 	}
-	return r.UpdateMap(ctx, tx, "id", adminID, updateMap)
+	if v := form.Enable; v != nil {
+		e := enum.Enable(*v)
+		if e.IsValid() {
+			updateMap["enable"] = e
+		}
+	}
+	if len(updateMap) == 0 {
+		return nil
+	}
+	return r.UpdateMap(ctx, tx, "id", id, updateMap)
 }
 
 // ListPage 获取分页列表数据
-func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.AdminListQuery) ([]model.AdminListItem, int64, error) {
+func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.AdminListPageQuery) ([]model.AdminListItem, int64, error) {
 	var list []model.AdminListItem
 	var total int64
 	db := r.getDB(ctx, tx)
 	db = db.Model(&model.Admin{})
-	if query.Username != nil && *query.Username != "" {
-		db = db.Where("username LIKE ?", "%"+*query.Username+"%")
+	if v := query.Username; v != nil && *v != "" {
+		db = db.Where("username LIKE ?", "%"+*v+"%")
 	}
-	if query.Gender != nil {
-		db = db.Where("gender = ?", *query.Gender)
+	if v := query.Gender; v != nil {
+		g := enum.Gender(*v)
+		if g.IsValid() {
+			db = db.Where("gender = ?", g)
+		}
 	}
-	if query.Enable != nil {
-		db = db.Where("enable = ?", *query.Enable)
+	if v := query.Enable; v != nil {
+		e := enum.Enable(*v)
+		if e.IsValid() {
+			db = db.Where("enable = ?", e)
+		}
 	}
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -78,23 +92,29 @@ func (r *gormRepo) ListPage(ctx context.Context, tx *gorm.DB, query model.AdminL
 	return list, total, nil
 }
 
-// UpdateProfile 更新管理员个人资料
-func (r *gormRepo) UpdateProfile(ctx context.Context, tx *gorm.DB, adminID uint64, form model.AdminUpdateProfileForm) error {
-	updateMap := make(map[string]any)
-	if form.Nickname != nil {
-		updateMap["nickname"] = *form.Nickname
+// UpdateProfileByID 更新管理员个人资料
+func (r *gormRepo) UpdateProfileByID(ctx context.Context, tx *gorm.DB, id uint64, form model.AdminUpdateProfileByIdForm) error {
+	updateMap := make(map[string]any, 5)
+	if v := form.Nickname; v != nil && *v != "" {
+		updateMap["nickname"] = *v
 	}
-	if form.Email != nil {
-		updateMap["email"] = *form.Email
+	if v := form.Email; v != nil && *v != "" {
+		updateMap["email"] = *v
 	}
-	if form.Address != nil {
-		updateMap["address"] = *form.Address
+	if v := form.Address; v != nil && *v != "" {
+		updateMap["address"] = *v
 	}
-	if form.Gender != nil {
-		updateMap["gender"] = enum.Enable(*form.Gender)
+	if v := form.Avatar; v != nil && *v != "" {
+		updateMap["avatar"] = *v
 	}
-	if form.Avatar != nil {
-		updateMap["avatar"] = *form.Avatar
+	if v := form.Gender; v != nil {
+		g := enum.Gender(*v)
+		if g.IsValid() {
+			updateMap["gender"] = g
+		}
 	}
-	return r.UpdateMap(ctx, tx, "id", adminID, updateMap)
+	if len(updateMap) == 0 {
+		return nil
+	}
+	return r.UpdateMap(ctx, tx, "id", id, updateMap)
 }
