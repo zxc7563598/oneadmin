@@ -2,5 +2,5 @@ package webui
 
 import "embed"
 
-//go:embed dist/*
+//go:embed all:dist
 var Dist embed.FS

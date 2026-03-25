@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"io"
 	"io/fs"
 	"net/http"
 
@@ -21,31 +22,30 @@ func RouteRegister(r *gin.Engine, rdb *redis.Client, handlers *Handlers) *gin.En
 	RegisterWeb(admin)
 	// api路由
 	adminApi := r.Group("/api/admin")
-	adminApi.POST("/auth/login", handlers.Admin.Login)                                                  // 完成
-	adminApi.POST("/auth/switch-role", middleware.AdminAuth(rdb), handlers.Admin.SwitchRole)            // 完成
-	adminApi.POST("/auth/logout", middleware.AdminAuth(rdb), handlers.Admin.Logout)                     // 完成
-	adminApi.POST("/auth/refresh", handlers.Admin.Refresh)                                              // 完成
-	adminApi.POST("/auth/detail", middleware.AdminAuth(rdb), handlers.Admin.Details)                    // 完成
-	adminApi.POST("/admin/list", middleware.AdminAuth(rdb), handlers.Admin.ListPage)                    // 完成
-	adminApi.POST("/admin/delete", middleware.AdminAuth(rdb), handlers.Admin.Delete)                    // 完成
-	adminApi.POST("/admin/save", middleware.AdminAuth(rdb), handlers.Admin.Save)                        // 完成
-	adminApi.POST("/admin/update-profile", middleware.AdminAuth(rdb), handlers.Admin.UpdateProfile)     // 完成
-	adminApi.POST("/auth/change-password", middleware.AdminAuth(rdb), handlers.Admin.ChangePassword)    // 完成
-	adminApi.POST("/admin/update-password", middleware.AdminAuth(rdb), handlers.Admin.UpdatePassword)   // 完成
-	adminApi.POST("/roles/list", middleware.AdminAuth(rdb), handlers.Role.ListPage)                     // 完成
-	adminApi.POST("/roles/all", middleware.AdminAuth(rdb), handlers.Role.ListAll)                       // 完成
-	adminApi.POST("/roles/save", middleware.AdminAuth(rdb), handlers.Role.Save)                         // 完成
-	adminApi.POST("/roles/delete", middleware.AdminAuth(rdb), handlers.Role.Delete)                     // 完成
-	adminApi.POST("/roles/add-role-users", middleware.AdminAuth(rdb), handlers.Role.AddRoleUsers)       // 完成
-	adminApi.POST("/roles/remove-role-users", middleware.AdminAuth(rdb), handlers.Role.RemoveRoleUsers) // 完成
-	adminApi.POST("/roles/permissions", middleware.AdminAuth(rdb), handlers.Role.Permissions)           // 完成
-
-	adminApi.POST("/menu/list", middleware.AdminAuth(rdb), handlers.Menu.List)         // 完成
-	adminApi.POST("/menu/validate", middleware.AdminAuth(rdb), handlers.Menu.Validate) // 完成
-	adminApi.POST("/menu/buttons", middleware.AdminAuth(rdb), handlers.Menu.Buttons)   // 完成
-	adminApi.POST("/menu/save", middleware.AdminAuth(rdb), handlers.Menu.Save)         // 完成
-	adminApi.POST("/menu/toggle", middleware.AdminAuth(rdb), handlers.Menu.Toggle)     // 完成
-	adminApi.POST("/menu/delete", middleware.AdminAuth(rdb), handlers.Menu.Delete)     // 完成
+	adminApi.POST("/auth/login", handlers.Admin.Login)
+	adminApi.POST("/auth/switch-role", middleware.AdminAuth(rdb), handlers.Admin.SwitchRole)
+	adminApi.POST("/auth/logout", middleware.AdminAuth(rdb), handlers.Admin.Logout)
+	adminApi.POST("/auth/refresh", handlers.Admin.Refresh)
+	adminApi.POST("/auth/detail", middleware.AdminAuth(rdb), handlers.Admin.Details)
+	adminApi.POST("/admin/list", middleware.AdminAuth(rdb), handlers.Admin.ListPage)
+	adminApi.POST("/admin/delete", middleware.AdminAuth(rdb), handlers.Admin.Delete)
+	adminApi.POST("/admin/save", middleware.AdminAuth(rdb), handlers.Admin.Save)
+	adminApi.POST("/admin/update-profile", middleware.AdminAuth(rdb), handlers.Admin.UpdateProfile)
+	adminApi.POST("/auth/change-password", middleware.AdminAuth(rdb), handlers.Admin.ChangePassword)
+	adminApi.POST("/admin/update-password", middleware.AdminAuth(rdb), handlers.Admin.UpdatePassword)
+	adminApi.POST("/roles/list", middleware.AdminAuth(rdb), handlers.Role.ListPage)
+	adminApi.POST("/roles/all", middleware.AdminAuth(rdb), handlers.Role.ListAll)
+	adminApi.POST("/roles/save", middleware.AdminAuth(rdb), handlers.Role.Save)
+	adminApi.POST("/roles/delete", middleware.AdminAuth(rdb), handlers.Role.Delete)
+	adminApi.POST("/roles/add-role-users", middleware.AdminAuth(rdb), handlers.Role.AddRoleUsers)
+	adminApi.POST("/roles/remove-role-users", middleware.AdminAuth(rdb), handlers.Role.RemoveRoleUsers)
+	adminApi.POST("/roles/permissions", middleware.AdminAuth(rdb), handlers.Role.Permissions)
+	adminApi.POST("/menu/list", middleware.AdminAuth(rdb), handlers.Menu.List)
+	adminApi.POST("/menu/validate", middleware.AdminAuth(rdb), handlers.Menu.Validate)
+	adminApi.POST("/menu/buttons", middleware.AdminAuth(rdb), handlers.Menu.Buttons)
+	adminApi.POST("/menu/save", middleware.AdminAuth(rdb), handlers.Menu.Save)
+	adminApi.POST("/menu/toggle", middleware.AdminAuth(rdb), handlers.Menu.Toggle)
+	adminApi.POST("/menu/delete", middleware.AdminAuth(rdb), handlers.Menu.Delete)
 	return r
 }
 
@@ -54,16 +54,27 @@ func RegisterWeb(admin *gin.RouterGroup) {
 	if err != nil {
 		panic(err)
 	}
-	fileServer := http.StripPrefix(
-		"/admin/",
-		http.FileServer(http.FS(sub)),
-	)
-	// /admin → /admin/
+	fileServer := http.FileServer(http.FS(sub))
 	admin.GET("", func(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/admin/")
 	})
-	// /admin/* 交给 FileServer
 	admin.GET("/*filepath", func(c *gin.Context) {
-		fileServer.ServeHTTP(c.Writer, c.Request)
+		path := c.Param("filepath")
+		if len(path) > 0 && path[0] == '/' {
+			path = path[1:]
+		}
+		if _, err := sub.Open(path); err == nil {
+			http.StripPrefix("/admin/", fileServer).ServeHTTP(c.Writer, c.Request)
+			return
+		}
+		index, err := sub.Open("index.html")
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		defer index.Close()
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.Status(http.StatusOK)
+		io.Copy(c.Writer, index)
 	})
 }
