@@ -211,7 +211,6 @@ async function onSave() {
     let newFormData
     if (!modalForm.value.parentId)
       modalForm.value.parentId = null
-  console.log('提交数据',modalForm.value)
     if (modalAction.value === 'add') {
       const res = await api.savePermission(modalForm.value)
       newFormData = res.data

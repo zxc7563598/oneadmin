@@ -3,13 +3,13 @@
 import { request } from '@/utils'
 
 export default {
-  create: data => request.post('/role', data),
-  read: (params = {}) => request.get('/role/page', { params }),
-  update: data => request.patch(`/role/${data.id}`, data),
-  delete: id => request.delete(`/role/${id}`),
+  save: data => request.post('/roles/save', data),
+  read: (params = {}) => request.post('/roles/list', params),
+  delete: id => request.post("/roles/delete", { id }),
 
-  getAllPermissionTree: () => request.get('/permission/tree'),
-  getAllUsers: (params = {}) => request.get('/user', { params }),
-  addRoleUsers: (roleId, data) => request.patch(`/role/users/add/${roleId}`, data),
-  removeRoleUsers: (roleId, data) => request.patch(`/role/users/remove/${roleId}`, data),
+  getAllPermissionTree: () => request.post('/menu/list'),
+
+  getAllUsers: (params = {}) => request.post('/admin/list', params),
+  addRoleUsers: (roleId, adminIds) => request.post('/roles/add-role-users', { roleId, adminIds }),
+  removeRoleUsers: (roleId, adminIds) => request.post('/roles/remove-role-users', { roleId, adminIds }),
 }

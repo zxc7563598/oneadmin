@@ -4,8 +4,13 @@
   <MeModal ref="modalRef" title="请选择角色" width="360px" class="p-12">
     <n-radio-group v-model:value="roleCode" class="cus-scroll-y max-h-420 w-full py-16">
       <n-space vertical :size="24" class="mx-12">
-        <n-radio-button v-for="role in roles" :key="role.id" class="h-36 w-full text-center text-16 leading-36"
-          :class="{ 'bg-primary! color-white!': role.code === roleCode }" :value="role.code">
+        <n-radio-button
+          v-for="role in roles"
+          :key="role.id"
+          class="h-36 w-full text-center text-16 leading-36"
+          :class="{ 'bg-primary! color-white!': role.code === roleCode }"
+          :value="role.code"
+        >
           {{ role.name }}
         </n-radio-button>
       </n-space>
@@ -16,8 +21,14 @@
         <n-button class="flex-1" size="large" @click="logout()">
           退出登录
         </n-button>
-        <n-button :loading="okLoading" class="ml-20 flex-1" type="primary" size="large"
-          :disabled="userStore.currentRole?.code === roleCode" @click="setCurrentRole">
+        <n-button
+          :loading="okLoading"
+          class="ml-20 flex-1"
+          type="primary"
+          size="large"
+          :disabled="userStore.currentRole?.code === roleCode"
+          @click="setCurrentRole"
+        >
           确认
         </n-button>
       </div>

@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store'
 
 let isConfirming = false
 
-function handleAuthExpired(content, needTip) {
+export function handleAuthExpired(content, needTip) {
   if (isConfirming || !needTip)
     return
   isConfirming = true
@@ -32,6 +32,8 @@ export function resolveResError(code, message, needTip = true) {
     case 10005:
     case 10006:
     case 10007:
+    case 10008:
+    case 20001:
       return handleAuthExpired('登录已过期，是否重新登录？', needTip)
     default:
       message = message ?? `【${code}】: 未知异常!`

@@ -109,9 +109,9 @@ onMounted(() => {
 const { modalRef, modalFormRef, modalAction, modalForm, handleAdd, handleDelete, handleEdit }
   = useCrud({
     name: '角色',
-    doCreate: api.create,
+    doCreate: api.save,
     doDelete: api.delete,
-    doUpdate: api.update,
+    doUpdate: api.save,
     initForm: { enable: true },
     refresh: (_, keepCurrentPage) => $table.value?.handleSearch(keepCurrentPage),
   })
@@ -198,7 +198,7 @@ const columns = [
 async function handleEnable(row) {
   row.enableLoading = true
   try {
-    await api.update({ id: row.id, enable: !row.enable })
+    await api.save({ id: row.id, enable: !row.enable })
     row.enableLoading = false
     $message.success('操作成功')
     $table.value?.handleSearch()
@@ -210,5 +210,5 @@ async function handleEnable(row) {
 }
 
 const permissionTree = ref([])
-api.getAllPermissionTree().then(({ data = [] }) => (permissionTree.value = data))
+api.getAllPermissionTree().then(({ data = [] }) => (permissionTree.value = data?.menu))
 </script>

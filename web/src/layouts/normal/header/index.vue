@@ -9,10 +9,11 @@
     <span class="mx-6 opacity-20">|</span>
 
     <div class="flex flex-shrink-0 items-center px-12 text-18">
-
       <ToggleTheme />
 
       <Fullscreen />
+
+      <ThemeSetting class="mr-16" />
 
       <UserAvatar />
     </div>
@@ -20,10 +21,6 @@
 </template>
 
 <script setup>
-import { ToggleTheme } from '@/components'
+import { ThemeSetting, ToggleTheme } from '@/components'
 import { AppTab, Fullscreen, MenuCollapse, UserAvatar } from '@/layouts/components'
-
-function handleLinkClick(link) {
-  window.open(link)
-}
 </script>

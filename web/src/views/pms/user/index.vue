@@ -9,20 +9,9 @@
       </NButton>
     </template>
 
-    <MeCrud
-      ref="$table"
-      v-model:query-items="queryItems"
-      :scroll-x="1200"
-      :columns="columns"
-      :get-data="api.read"
-    >
+    <MeCrud ref="$table" v-model:query-items="queryItems" :scroll-x="1200" :columns="columns" :get-data="api.read">
       <MeQueryItem label="用户名" :label-width="50">
-        <n-input
-          v-model:value="queryItems.username"
-          type="text"
-          placeholder="请输入用户名"
-          clearable
-        />
+        <n-input v-model:value="queryItems.username" type="text" placeholder="请输入用户名" clearable />
       </MeQueryItem>
 
       <MeQueryItem label="性别" :label-width="50">
@@ -30,60 +19,35 @@
       </MeQueryItem>
 
       <MeQueryItem label="状态" :label-width="50">
-        <n-select
-          v-model:value="queryItems.enable"
-          clearable
-          :options="[
-            { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
-          ]"
-        />
+        <n-select v-model:value="queryItems.enable" clearable :options="[
+          { label: '启用', value: 1 },
+          { label: '停用', value: 0 },
+        ]" />
       </MeQueryItem>
     </MeCrud>
 
     <MeModal ref="modalRef" width="520px">
-      <n-form
-        ref="modalFormRef"
-        label-placement="left"
-        label-align="left"
-        :label-width="80"
-        :model="modalForm"
-        :disabled="modalAction === 'view'"
-      >
-        <n-form-item
-          label="用户名"
-          path="username"
-          :rule="{
-            required: true,
-            message: '请输入用户名',
-            trigger: ['input', 'blur'],
-          }"
-        >
+      <n-form ref="modalFormRef" label-placement="left" label-align="left" :label-width="80" :model="modalForm"
+        :disabled="modalAction === 'view'">
+        <n-form-item label="用户名" path="username" :rule="{
+          required: true,
+          message: '请输入用户名',
+          trigger: ['input', 'blur'],
+        }">
           <n-input v-model:value="modalForm.username" :disabled="modalAction !== 'add'" />
         </n-form-item>
-        <n-form-item
-          v-if="['add', 'reset'].includes(modalAction)"
-          :label="modalAction === 'reset' ? '重置密码' : '初始密码'"
-          path="password"
-          :rule="{
+        <n-form-item v-if="['add', 'reset'].includes(modalAction)" :label="modalAction === 'reset' ? '重置密码' : '初始密码'"
+          path="password" :rule="{
             required: true,
             message: '请输入密码',
             trigger: ['input', 'blur'],
-          }"
-        >
+          }">
           <n-input v-model:value="modalForm.password" type="password" show-password-on="mousedown" />
         </n-form-item>
 
         <n-form-item v-if="['add', 'setRole'].includes(modalAction)" label="角色" path="roleIds">
-          <n-select
-            v-model:value="modalForm.roleIds"
-            :options="roles"
-            label-field="name"
-            value-field="id"
-            clearable
-            filterable
-            multiple
-          />
+          <n-select v-model:value="modalForm.roleIds" :options="roles" label-field="name" value-field="id" clearable
+            filterable multiple />
         </n-form-item>
         <n-form-item v-if="modalAction === 'add'" label="状态" path="enable">
           <NSwitch v-model:value="modalForm.enable">
@@ -126,7 +90,7 @@ const genders = [
   { label: '女', value: 2 },
 ]
 const roles = ref([])
-api.getAllRoles().then(({ data = [] }) => (roles.value = data))
+api.getAllRoles().then(({ data = [] }) => (roles.value = data?.list))
 
 const {
   modalRef,
@@ -140,9 +104,9 @@ const {
 } = useCrud({
   name: '用户',
   initForm: { enable: true },
-  doCreate: api.create,
+  doCreate: api.save,
   doDelete: api.delete,
-  doUpdate: api.update,
+  doUpdate: api.save,
   refresh: () => $table.value?.handleSearch(),
 })
 
@@ -280,7 +244,7 @@ const columns = [
 async function handleEnable(row) {
   row.enableLoading = true
   try {
-    await api.update({ id: row.id, enable: !row.enable })
+    await api.save({ id: row.id, username: row.username, enable: !row.enable })
     row.enableLoading = false
     $message.success('操作成功')
     $table.value?.handleSearch()
@@ -304,13 +268,13 @@ function handleOpenRolesSet(row) {
 function onSave() {
   if (modalAction.value === 'setRole') {
     return handleSave({
-      api: () => api.update(modalForm.value),
+      api: () => api.save({ id: modalForm.value.id, username: modalForm.value.username, roleIds: modalForm.value.roleIds }),
       cb: () => $message.success('分配成功'),
     })
   }
   else if (modalAction.value === 'reset') {
     return handleSave({
-      api: () => api.resetPwd(modalForm.value.id, modalForm.value),
+      api: () => api.resetPwd(modalForm.value.id, modalForm.value.password),
       cb: () => $message.success('密码重置成功'),
     })
   }
