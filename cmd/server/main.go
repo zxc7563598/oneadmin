@@ -22,7 +22,7 @@ import (
 // @title OneAdmin API
 // @version 1.0
 // @description OneAdmin 系统接口文档
-// @contact.name API 支持
+// @contact.name 何俊杰
 // @contact.email junjie.he.925@gmail.com
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT

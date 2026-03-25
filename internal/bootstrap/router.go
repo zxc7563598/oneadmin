@@ -18,14 +18,14 @@ func RouteRegister(r *gin.Engine, rdb *redis.Client, handlers *Handlers) *gin.En
 	r.RedirectFixedPath = false
 	// 日志注册
 	if gin.Mode() != gin.ReleaseMode {
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		registerApiDoc(r)
 	}
 	// 中间件注册
 	r.Use(gin.Logger(), gin.Recovery(), middleware.CORSMiddleware(), middleware.LocaleMiddleware())
 	// web路由
 	admin := r.Group("/admin")
 	// web.Use(middleware.WebBasicAuth(webUser, webPass))
-	RegisterWeb(admin)
+	registerWeb(admin)
 	// api路由
 	adminApi := r.Group("/api/admin")
 	adminApi.POST("/auth/login", handlers.Admin.Login)
@@ -55,7 +55,7 @@ func RouteRegister(r *gin.Engine, rdb *redis.Client, handlers *Handlers) *gin.En
 	return r
 }
 
-func RegisterWeb(admin *gin.RouterGroup) {
+func registerWeb(admin *gin.RouterGroup) {
 	sub, err := fs.Sub(webui.Dist, "dist")
 	if err != nil {
 		panic(err)
@@ -82,5 +82,28 @@ func RegisterWeb(admin *gin.RouterGroup) {
 		c.Header("Content-Type", "text/html; charset=utf-8")
 		c.Status(http.StatusOK)
 		io.Copy(c.Writer, index)
+	})
+}
+
+func registerApiDoc(r *gin.Engine) {
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/redoc", func(c *gin.Context) {
+		html := `<!DOCTYPE html>
+			<html>
+				<head>
+					<title>API Documentation - ReDoc</title>
+					<meta charset="utf-8"/>
+					<meta name="viewport" content="width=device-width, initial-scale=1">
+					<style>
+						body { margin: 0; padding: 0; }
+					</style>
+				</head>
+				<body>
+					<redoc spec-url='/swagger/doc.json'></redoc>
+					<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+				</body>
+			</html>`
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.String(200, html)
 	})
 }
