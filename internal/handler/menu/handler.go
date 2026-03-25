@@ -22,8 +22,13 @@ func New(menuSvc *menu.Service) *Handler {
 	}
 }
 
-// List 处理获取全部菜单请求
-// POST /api/admin/menu/list
+// @Summary 获取菜单列表
+// @Description 获取系统完整菜单树结构（包含菜单及按钮权限），用于前端动态路由生成和权限控制
+// @Tags 菜单
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Success 200 {object} response.Response{data=resp.MenuListResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/menu/list [post]
 func (h *Handler) List(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -53,8 +58,14 @@ func (h *Handler) List(c *gin.Context) {
 	})
 }
 
-// Validate 处理验证菜单是否存在
-// POST /api/admin/menu/validate
+// @Summary 校验菜单路径是否存在
+// @Description 根据菜单路径校验菜单是否已存在，常用于前端需要对菜单进行校验时
+// @Tags 菜单
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.MenuValidateReq true "校验参数（菜单路径）"
+// @Success 200 {object} response.Response{data=resp.MenuValidateResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/menu/validate [post]
 func (h *Handler) Validate(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -97,8 +108,14 @@ func (h *Handler) Validate(c *gin.Context) {
 	})
 }
 
-// Buttons 获取菜单下的按钮
-// POST /api/admin/menu/buttons
+// @Summary 获取菜单下的按钮权限
+// @Description 根据菜单 ID 获取其下的按钮权限列表（按钮类型菜单），用于前端页面按钮级权限控制
+// @Tags 菜单
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.MenuButtonsReq true "查询参数（父级菜单 ID）"
+// @Success 200 {object} response.Response{data=resp.MenuButtonsResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/menu/buttons [post]
 func (h *Handler) Buttons(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -142,8 +159,14 @@ func (h *Handler) Buttons(c *gin.Context) {
 	})
 }
 
-// Save 添加或变更菜单信息
-// POST /api/admin/menu/save
+// @Summary 创建或更新菜单
+// @Description 根据是否传入 ID 创建或更新菜单信息：未传 ID 时为创建，传入 ID 时为更新，支持菜单及按钮类型（MENU / BUTTON），用于构建系统菜单结构和权限控制
+// @Tags 菜单
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.MenuSaveReq true "菜单保存参数"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/menu/save [post]
 func (h *Handler) Save(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -210,8 +233,14 @@ func (h *Handler) Save(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// Toggle 快速切换菜单的启用状态
-// POST /api/admin/menu/toggle
+// @Summary 切换菜单启用状态
+// @Description 根据菜单 ID 切换菜单的启用状态（启用/禁用），常用于后台列表中的快速开关操作
+// @Tags 菜单
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.MenuToggleReq true "切换参数（菜单 ID）"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/menu/toggle [post]
 func (h *Handler) Toggle(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -252,8 +281,14 @@ func (h *Handler) Toggle(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// Delete 删除菜单
-// POST /api/admin/menu/delete
+// @Summary 删除菜单
+// @Description 根据菜单 ID 删除菜单（通常不允许删除存在子菜单或已绑定权限的菜单）
+// @Tags 菜单
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.MenuDeleteReq true "删除参数（菜单 ID）"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/menu/delete [post]
 func (h *Handler) Delete(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()

@@ -7,6 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/zxc7563598/oneadmin/internal/middleware"
 	"github.com/zxc7563598/oneadmin/internal/webui"
 )
@@ -14,6 +16,10 @@ import (
 func RouteRegister(r *gin.Engine, rdb *redis.Client, handlers *Handlers) *gin.Engine {
 	r.RedirectTrailingSlash = false
 	r.RedirectFixedPath = false
+	// 日志注册
+	if gin.Mode() != gin.ReleaseMode {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 	// 中间件注册
 	r.Use(gin.Logger(), gin.Recovery(), middleware.CORSMiddleware(), middleware.LocaleMiddleware())
 	// web路由

@@ -32,6 +32,7 @@ help:
 	@echo "  make dev           启动开发环境 (Go + Web)"
 	@echo "  make dev-go        仅启动 Go 服务"
 	@echo "  make dev-web       仅启动 Web dev server"
+	@echo "  make swagger       生成 Swagger 文档"
 	@echo ""
 	@echo "构建命令:"
 	@echo "  make build         构建当前平台"
@@ -48,10 +49,6 @@ help:
 	@echo "  make clean         清理构建文件"
 	@echo ""
 
-## ===============================
-## 开发环境
-## ===============================
-
 dev:
 	@echo "启动开发环境..."
 	@echo "Web: http://localhost:5173"
@@ -66,10 +63,13 @@ dev-web:
 	@echo "启动 Web dev server..."
 	@cd ./web && npm install && npm run dev
 
-
-## ===============================
-## Web 构建
-## ===============================
+swagger:
+	@command -v swag >/dev/null 2>&1 || { \
+		echo "❌ 未安装 swag，请执行: go install github.com/swaggo/swag/cmd/swag@latest"; \
+		exit 1; \
+	}
+	@echo "生成 Swagger 文档..."
+	@swag init -g cmd/server/main.go --parseInternal
 
 build-web:
 	@echo "构建 Web 站点页面..."
@@ -84,50 +84,35 @@ build-web:
 	@mkdir -p ./internal/webui
 	@cp -R ./web/dist ./internal/webui/dist
 
-
-## ===============================
-## Go 构建
-## ===============================
-
 build: build-web
 	@echo "构建 $(APP_NAME)..."
 	@mkdir -p $(BUILD_DIR)
 	$(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME) $(CMD_DIR)
 
-build-linux: build-web
+build-linux: build-web swagger
 	@echo "构建 Linux 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=linux GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-linux-amd64 $(CMD_DIR)
 
-build-macos: build-web
+build-macos: build-web swagger
 	@echo "构建 macOS Intel 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=darwin GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-darwin-amd64 $(CMD_DIR)
 
-build-macos-arm: build-web
+build-macos-arm: build-web swagger
 	@echo "构建 macOS ARM 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=darwin GOARCH=arm64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-darwin-arm64 $(CMD_DIR)
 
-build-windows: build-web
+build-windows: build-web swagger
 	@echo "构建 Windows 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=windows GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-windows-amd64.exe $(CMD_DIR)
-
-
-## ===============================
-## 发布
-## ===============================
 
 release: build-linux build-macos build-macos-arm build-windows
 	@echo ""
 	@echo "构建完成，输出目录:"
 	@echo "  $(BUILD_DIR)"
-
-
-## ===============================
-## 清理
-## ===============================
 
 clean:
 	@echo "清理构建目录..."

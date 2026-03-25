@@ -2,53 +2,85 @@ package resp
 
 // AdminLoginResp 管理员登录/刷新登录返回
 type AdminLoginResp struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	// access token
+	AccessToken string `json:"accessToken" example:"Bearer xxxxxxxxxx"`
+	// refresh token
+	RefreshToken string `json:"refreshToken" example:"Bearer xxxxxxxxxx"`
 }
 
 // AdminListPageResp 获取管理员分页列表返回
 type AdminListPageResp struct {
-	Total    int64               `json:"total"`
+	// 总计条数
+	Total int64 `json:"total" example:"100"`
+	// 当前页码数据
 	PageData []AdminListPageItem `json:"pageData"`
 }
 
 type AdminListPageItem struct {
-	ID        uint64                 `json:"id"`
-	Username  string                 `json:"username"`
-	Enable    bool                   `json:"enable"`
-	Gender    int                    `json:"gender"`
-	Avatar    string                 `json:"avatar"`
-	Address   string                 `json:"address"`
-	Email     string                 `json:"email"`
-	Roles     []AdminDetailsRoleItem `json:"roles"`
-	CreatedAt string                 `json:"createdAt"`
-	UpdatedAt string                 `json:"updatedAt"`
+	// 管理员ID
+	ID uint64 `json:"id" example:"1"`
+	// 账号
+	Username string `json:"username" example:"admin"`
+	// 状态
+	Enable bool `json:"enable" example:"true"`
+	// 性别
+	Gender int `json:"gender" example:"1" enums:"0,1,2"`
+	// 头像地址
+	Avatar string `json:"avatar" example:"https://cdn.hejunjie.life/avatars/oneadmin.jpeg"`
+	// 居住地址
+	Address string `json:"address" example:"xxxxxxx"`
+	// email
+	Email string `json:"email" example:"xxxxx@xxx.com"`
+	// 拥有角色列表
+	Roles []AdminDetailsRoleItem `json:"roles"`
+	// 创建时间
+	CreatedAt string `json:"createdAt"`
+	// 更新时间
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // AdminDetailsResp 获取单个管理员详细信息返回
 type AdminDetailsResp struct {
-	ID          uint64                  `json:"id"`
-	Username    string                  `json:"username"`
-	Enable      bool                    `json:"enable"`
-	CreatedAt   string                  `json:"createdAt"`
-	UpdatedAt   string                  `json:"updatedAt"`
-	Profile     AdminDetailsProfileItem `json:"profile"`
-	Roles       []AdminDetailsRoleItem  `json:"roles"`
-	CurrentRole AdminDetailsRoleItem    `json:"currentRole"`
+	// 管理员ID
+	ID uint64 `json:"id" example:"1"`
+	// 账号
+	Username string `json:"username" example:"admin"`
+	// 状态
+	Enable bool `json:"enable" example:"true"`
+	// 创建时间
+	CreatedAt string `json:"createdAt" example:"2026-03-25 12:00:00"`
+	// 更新时间
+	UpdatedAt string `json:"updatedAt" example:"2026-03-25 12:00:00"`
+	// 个人资料
+	Profile AdminDetailsProfileItem `json:"profile"`
+	// 拥有角色列表
+	Roles []AdminDetailsRoleItem `json:"roles"`
+	// 当前角色信息
+	CurrentRole AdminDetailsRoleItem `json:"currentRole"`
 }
 
 type AdminDetailsRoleItem struct {
-	ID     uint64 `json:"id"`
-	Code   string `json:"code"`
-	Name   string `json:"name"`
-	Enable bool   `json:"enable"`
+	// 角色ID
+	ID uint64 `json:"id" example:"1"`
+	// 角色标识
+	Code string `json:"code" example:"SUPER_ADMIN"`
+	// 角色名称
+	Name string `json:"name" example:"超级管理员"`
+	// 状态
+	Enable bool `json:"enable" example:"true"`
 }
 
 type AdminDetailsProfileItem struct {
-	ID       uint64 `json:"id"`
-	Nickname string `json:"nickName"`
-	Gender   int    `json:"gender"`
-	Avatar   string `json:"avatar"`
-	Address  string `json:"address"`
-	Email    string `json:"email"`
+	// 管理员ID
+	ID uint64 `json:"id" example:"1"`
+	// 名称
+	Nickname string `json:"nickName" example:"test name"`
+	// 性别
+	Gender int `json:"gender" example:"1" enums:"0,1,2"`
+	// 头像
+	Avatar string `json:"avatar" example:"https://cdn.hejunjie.life/avatars/oneadmin.jpeg"`
+	// 居住地址
+	Address string `json:"address" example:"xxxxxxx"`
+	// email
+	Email string `json:"email" example:"xxxxx@xxx.com"`
 }

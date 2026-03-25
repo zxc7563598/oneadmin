@@ -22,8 +22,13 @@ func New(adminSvc *admin.Service) *Handler {
 	}
 }
 
-// Login 处理管理员登录请求
-// POST /api/admin/auth/login
+// @Summary 管理员登录
+// @Description 管理员通过账号和密码登录系统，登录成功后返回 access_token 和 refresh_token，用于后续接口鉴权
+// @Tags 认证
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminLoginReq true "登录参数"
+// @Success 200 {object} response.Response{data=resp.AdminLoginResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	ctx := c.Request.Context()
 	lang := i18n.GetLang(ctx)
@@ -59,8 +64,13 @@ func (h *Handler) Login(c *gin.Context) {
 	})
 }
 
-// Refresh 处理管理员刷新登陆凭证请求
-// POST /api/admin/auth/refresh
+// @Summary 刷新登录凭证
+// @Description 使用 refresh_token 刷新登录状态，获取新的 access_token 和 refresh_token，用于延长会话有效期
+// @Tags 认证
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminRefreshReq true "刷新凭证参数"
+// @Success 200 {object} response.Response{data=resp.AdminLoginResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/auth/refresh [post]
 func (h *Handler) Refresh(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -96,8 +106,13 @@ func (h *Handler) Refresh(c *gin.Context) {
 	})
 }
 
-// Logout 处理管理员退出登录请求
-// POST /api/admin/auth/logout
+// @Summary 管理员退出登录
+// @Description 管理员退出当前登录状态，使当前 access_token 失效（通常用于前端主动登出）
+// @Tags 认证
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/auth/logout [post]
 func (h *Handler) Logout(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -125,8 +140,14 @@ func (h *Handler) Logout(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// SwitchRole 处理管理员切换角色请求
-// POST /api/admin/auth/switch-role
+// @Summary 切换管理员角色
+// @Description 管理员在已登录状态下切换当前角色，根据目标角色重新生成 access_token 和 refresh_token，用于更新权限上下文
+// @Tags 认证
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminSwitchRoleReq true "切换角色参数"
+// @Success 200 {object} response.Response{data=resp.AdminLoginResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/auth/switch-role [post]
 func (h *Handler) SwitchRole(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -170,8 +191,14 @@ func (h *Handler) SwitchRole(c *gin.Context) {
 	})
 }
 
-// ChangePassword 处理管理员根据旧密码变更新密码请求
-// POST /api/admin/auth/change-password
+// @Summary 修改登录密码
+// @Description 管理员在已登录状态下通过旧密码验证后修改登录密码，修改成功后建议重新登录以获取新的凭证
+// @Tags 认证
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminChangePasswordReq true "修改密码参数"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/auth/change-password [post]
 func (h *Handler) ChangePassword(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -211,8 +238,69 @@ func (h *Handler) ChangePassword(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// ListPage 处理获取管理员列表(分页)请求
-// POST /api/admin/admin/list
+// @Summary 获取当前管理员信息
+// @Description 获取当前登录管理员的详细信息，包括基础信息、个人资料、拥有角色列表及当前角色信息
+// @Tags 认证
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Success 200 {object} response.Response{data=resp.AdminDetailsResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/auth/detail [post]
+func (h *Handler) Details(c *gin.Context) {
+	// 获取上下文/语言配置
+	ctx := c.Request.Context()
+	lang := i18n.GetLang(ctx)
+	// 获取管理员ID
+	adminInfo, ok := handler.GetAdminInfo(c)
+	if !ok {
+		response.Error(c, lang, 20001)
+		return
+	}
+	// 执行请求
+	svcResp, errCode, err := h.adminSvc.Details(ctx, adminInfo.AdminID)
+	if errCode != 0 {
+		handler.ErrorLog(
+			logger.AdminLogger,
+			"adminSvc.Details 调用失败",
+			errCode,
+			err,
+			zap.Any("adminInfo", adminInfo),
+		)
+		response.Error(c, lang, errCode)
+		return
+	}
+	// 返回结果
+	response.Success(c, lang, resp.AdminDetailsResp{
+		ID:        svcResp.ID,
+		Username:  svcResp.Username,
+		Enable:    svcResp.Enable,
+		CreatedAt: svcResp.CreatedAt,
+		UpdatedAt: svcResp.UpdatedAt,
+		Profile: resp.AdminDetailsProfileItem{
+			ID:       svcResp.Profile.ID,
+			Nickname: svcResp.Profile.Nickname,
+			Gender:   svcResp.Profile.Gender,
+			Avatar:   svcResp.Profile.Avatar,
+			Address:  svcResp.Profile.Address,
+			Email:    svcResp.Profile.Email,
+		},
+		Roles: toAdminDetailsRoleItem(svcResp.Roles),
+		CurrentRole: resp.AdminDetailsRoleItem{
+			ID:     svcResp.CurrentRole.ID,
+			Code:   svcResp.CurrentRole.Code,
+			Name:   svcResp.CurrentRole.Name,
+			Enable: svcResp.CurrentRole.Enable,
+		},
+	})
+}
+
+// @Summary 分页查询管理员列表
+// @Description 分页获取管理员列表，支持按用户名、性别、启用状态进行筛选
+// @Tags 管理员
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminListPageReq true "请求参数"
+// @Success 200 {object} response.Response{data=resp.AdminListPageResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/admin/list [post]
 func (h *Handler) ListPage(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -268,58 +356,14 @@ func (h *Handler) ListPage(c *gin.Context) {
 	})
 }
 
-// Details 处理获取管理员详情请求
-// POST /api/admin/auth/detail
-func (h *Handler) Details(c *gin.Context) {
-	// 获取上下文/语言配置
-	ctx := c.Request.Context()
-	lang := i18n.GetLang(ctx)
-	// 获取管理员ID
-	adminInfo, ok := handler.GetAdminInfo(c)
-	if !ok {
-		response.Error(c, lang, 20001)
-		return
-	}
-	// 执行请求
-	svcResp, errCode, err := h.adminSvc.Details(ctx, adminInfo.AdminID)
-	if errCode != 0 {
-		handler.ErrorLog(
-			logger.AdminLogger,
-			"adminSvc.Details 调用失败",
-			errCode,
-			err,
-			zap.Any("adminInfo", adminInfo),
-		)
-		response.Error(c, lang, errCode)
-		return
-	}
-	// 返回结果
-	response.Success(c, lang, resp.AdminDetailsResp{
-		ID:        svcResp.ID,
-		Username:  svcResp.Username,
-		Enable:    svcResp.Enable,
-		CreatedAt: svcResp.CreatedAt,
-		UpdatedAt: svcResp.UpdatedAt,
-		Profile: resp.AdminDetailsProfileItem{
-			ID:       svcResp.Profile.ID,
-			Nickname: svcResp.Profile.Nickname,
-			Gender:   svcResp.Profile.Gender,
-			Avatar:   svcResp.Profile.Avatar,
-			Address:  svcResp.Profile.Address,
-			Email:    svcResp.Profile.Email,
-		},
-		Roles: toAdminDetailsRoleItem(svcResp.Roles),
-		CurrentRole: resp.AdminDetailsRoleItem{
-			ID:     svcResp.CurrentRole.ID,
-			Code:   svcResp.CurrentRole.Code,
-			Name:   svcResp.CurrentRole.Name,
-			Enable: svcResp.CurrentRole.Enable,
-		},
-	})
-}
-
-// Save 处理创建或变更管理员账号请求
-// POST /api/admin/admin/save
+// @Summary 创建或更新管理员
+// @Description 根据是否传入 ID 创建或更新管理员账号：未传 ID 时为创建，传入 ID 时为更新，同时可设置账号状态及绑定角色
+// @Tags 管理员
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminSaveReq true "管理员保存参数"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/admin/save [post]
 func (h *Handler) Save(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -368,8 +412,14 @@ func (h *Handler) Save(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// Delete 处理删除管理员请求
-// POST /api/admin/admin/delete
+// @Summary 删除管理员
+// @Description 根据管理员 ID 删除管理员账号（通常不允许删除当前登录管理员）
+// @Tags 管理员
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminDeleteReq true "删除参数（管理员 ID）"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/admin/delete [post]
 func (h *Handler) Delete(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -409,8 +459,14 @@ func (h *Handler) Delete(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// UpdatePassword 处理变更管理员账号密码请求
-// POST /api/admin/admin/update-password
+// @Summary 重置管理员密码
+// @Description 管理员根据管理员 ID 重置指定账号的登录密码（无需旧密码，通常需要具备管理员管理权限）
+// @Tags 管理员
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminResetAdminPasswordReq true "重置密码参数"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/admin/update-password [post]
 func (h *Handler) UpdatePassword(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -451,8 +507,14 @@ func (h *Handler) UpdatePassword(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// UpdatePassword 处理变更管理员个人信息请求
-// POST /api/admin/admin/update-profile
+// @Summary 更新管理员个人资料
+// @Description 管理员更新个人资料信息（如昵称、头像、性别、邮箱等），支持部分字段更新
+// @Tags 管理员
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.AdminUpdateProfileReq true "管理员个人资料参数"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/admin/update-profile [post]
 func (h *Handler) UpdateProfile(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()

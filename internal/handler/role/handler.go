@@ -22,8 +22,14 @@ func New(roleSvc *role.Service) *Handler {
 	}
 }
 
-// ListPage 处理获取角色列表(分页)请求
-// POST /api/admin/roles/list
+// @Summary 获取角色列表（分页）
+// @Description 获取角色分页列表，支持按角色名称模糊搜索及状态筛选，用于后台角色管理与权限分配
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.RoleListPageReq true "分页查询参数"
+// @Success 200 {object} response.Response{data=resp.RoleListPageResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/list [post]
 func (h *Handler) ListPage(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -77,8 +83,13 @@ func (h *Handler) ListPage(c *gin.Context) {
 	})
 }
 
-// ListPage 处理获取全部角色请求
-// POST /api/admin/roles/all
+// @Summary 获取全部角色列表
+// @Description 获取系统所有角色的简要信息（不分页），用于下拉选择或管理员绑定角色
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Success 200 {object} response.Response{data=resp.RoleListAllResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/all [post]
 func (h *Handler) ListAll(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -108,8 +119,14 @@ func (h *Handler) ListAll(c *gin.Context) {
 	})
 }
 
-// Save 处理创建或变更角色请求
-// POST /api/admin/roles/save
+// @Summary 创建或更新角色
+// @Description 根据是否传入 ID 创建或更新角色信息，同时可绑定菜单及按钮权限（权限ID集合）
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.RoleSaveReq true "角色保存参数"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/save [post]
 func (h *Handler) Save(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -160,8 +177,14 @@ func (h *Handler) Save(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// Delete 删除角色请求
-// POST /api/admin/roles/delete
+// @Summary 删除角色
+// @Description 根据角色 ID 删除角色（通常不允许删除已绑定管理员或正在使用的角色）
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.RoleDeleteReq true "删除参数（角色 ID）"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/delete [post]
 func (h *Handler) Delete(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -202,8 +225,14 @@ func (h *Handler) Delete(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// AddRoleUsers 分配角色到管理员
-// POST /api/admin/roles/add-role-users
+// @Summary 为角色分配管理员
+// @Description 将指定角色批量分配给管理员（建立管理员与角色的关联关系）
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.RoleAddRoleUsersReq true "分配参数（角色ID + 管理员ID列表）"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/add-role-users [post]
 func (h *Handler) AddRoleUsers(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -245,8 +274,14 @@ func (h *Handler) AddRoleUsers(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// AddRoleUsers 取消分配角色到管理员
-// POST /api/admin/roles/remove-role-users
+// @Summary 从角色移除管理员
+// @Description 将指定管理员从角色中批量移除（解除管理员与角色的关联关系）
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Param data body input.RoleRemoveRoleUsersReq true "移除参数（角色ID + 管理员ID列表）"
+// @Success 200 {object} response.Response "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/remove-role-users [post]
 func (h *Handler) RemoveRoleUsers(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()
@@ -288,8 +323,13 @@ func (h *Handler) RemoveRoleUsers(c *gin.Context) {
 	response.Success(c, lang, nil)
 }
 
-// Permissions 获取管理员菜单权限树请求
-// POST /api/admin/roles/permissions
+// @Summary 获取当前管理员权限菜单树
+// @Description 获取当前登录管理员在当前角色下的菜单及按钮权限树（已按权限过滤），用于前端动态路由及权限控制
+// @Tags 角色
+// @Security BearerAuth
+// @Param Accept-Language header string false "语言标识（zh: 中文，en: English）" enums(zh,en) default(zh)
+// @Success 200 {object} response.Response{data=resp.RolePermissionsResp} "统一响应（code=0成功，其它失败）"
+// @Router /api/admin/roles/permissions [post]
 func (h *Handler) Permissions(c *gin.Context) {
 	// 获取上下文/语言配置
 	ctx := c.Request.Context()

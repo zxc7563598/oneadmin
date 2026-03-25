@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/zxc7563598/oneadmin/docs"
 	"github.com/zxc7563598/oneadmin/internal/bootstrap"
 	"github.com/zxc7563598/oneadmin/internal/config"
 	"github.com/zxc7563598/oneadmin/internal/logger"
@@ -18,6 +19,19 @@ import (
 	"github.com/zxc7563598/oneadmin/pkg/jwt"
 )
 
+// @title OneAdmin API
+// @version 1.0
+// @description OneAdmin 系统接口文档
+// @contact.name API 支持
+// @contact.email junjie.he.925@gmail.com
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
+// @BasePath /
 func main() {
 	port := flag.Int("port", 9000, "服务端口")
 	configPath := flag.String("config", "config.yaml", "配置文件路径")
@@ -63,6 +77,8 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
+	// 注册 Swagger
+	docs.SwaggerInfo.Host = fmt.Sprintf("localhost:%d", *port)
 	// 启动服务
 	go func() {
 		log.Printf("服务在 %s 启动\n", addr)

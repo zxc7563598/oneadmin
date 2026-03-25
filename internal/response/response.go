@@ -7,6 +7,15 @@ import (
 	"github.com/zxc7563598/oneadmin/internal/i18n"
 )
 
+type Response struct {
+	// 响应code
+	Code int `json:"code" example:"0"`
+	// 响应信息
+	Msg string `json:"msg" example:"success"`
+	// 响应数据
+	Data any `json:"data"`
+}
+
 func respond(c *gin.Context, code int, lang string, data any) {
 	if lang == "" {
 		lang = i18n.GetLang(c.Request.Context())
