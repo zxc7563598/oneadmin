@@ -22,7 +22,7 @@ func respond(c *gin.Context, code int, lang string, data any) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
-		"msg":  i18n.GetMessage(lang, code),
+		"msg":  i18n.E(lang, code),
 		"data": data,
 	})
 }

@@ -93,8 +93,8 @@ func LoadLocales(dir string) error {
 	return nil
 }
 
-// GetMessage 获取指定 Code 对应语言内容
-func GetMessage(lang string, code int) string {
+// E 获取指定 Code 对应语言内容
+func E(lang string, code int) string {
 	if langMap, ok := errorsMap[lang]; ok {
 		if msg, ok := langMap[code]; ok {
 			return msg
