@@ -6,19 +6,19 @@ database:
     user: user
     password: password
     dbname: databasename
-  postgres: # postgres 数据库配置（不使用可不进行配置）
-    host: 127.0.0.1
-    port: 5432
-    user: user
-    password: password
-    dbname: databasename
-redis: # redis 配置（不使用可不进行配置）
-  host: 127.0.0.1
-  port: 6379
-  password: 
-  db: 0
-  pool_size: 20
-  min_idle_conns: 5
+  # postgres: # postgres 数据库配置（不使用可不进行配置）
+  #   host: 127.0.0.1
+  #   port: 5432
+  #   user: user
+  #   password: password
+  #   dbname: databasename
+# redis: # redis 配置（不使用可不进行配置）
+#   host: 127.0.0.1
+#   port: 6379
+#   password: 
+#   db: 0
+#   pool_size: 20
+#   min_idle_conns: 5
 jwt: # jwt 配置
   secret: "your secret"
   access_ttl: 7200
