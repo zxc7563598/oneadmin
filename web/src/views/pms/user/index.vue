@@ -19,35 +19,45 @@
       </MeQueryItem>
 
       <MeQueryItem label="状态" :label-width="50">
-        <n-select v-model:value="queryItems.enable" clearable :options="[
-          { label: '启用', value: 1 },
-          { label: '停用', value: 0 },
-        ]" />
+        <n-select
+          v-model:value="queryItems.enable" clearable :options="[
+            { label: '启用', value: 1 },
+            { label: '停用', value: 0 },
+          ]"
+        />
       </MeQueryItem>
     </MeCrud>
 
     <MeModal ref="modalRef" width="520px">
-      <n-form ref="modalFormRef" label-placement="left" label-align="left" :label-width="80" :model="modalForm"
-        :disabled="modalAction === 'view'">
-        <n-form-item label="用户名" path="username" :rule="{
-          required: true,
-          message: '请输入用户名',
-          trigger: ['input', 'blur'],
-        }">
+      <n-form
+        ref="modalFormRef" label-placement="left" label-align="left" :label-width="80" :model="modalForm"
+        :disabled="modalAction === 'view'"
+      >
+        <n-form-item
+          label="用户名" path="username" :rule="{
+            required: true,
+            message: '请输入用户名',
+            trigger: ['input', 'blur'],
+          }"
+        >
           <n-input v-model:value="modalForm.username" :disabled="modalAction !== 'add'" />
         </n-form-item>
-        <n-form-item v-if="['add', 'reset'].includes(modalAction)" :label="modalAction === 'reset' ? '重置密码' : '初始密码'"
+        <n-form-item
+          v-if="['add', 'reset'].includes(modalAction)" :label="modalAction === 'reset' ? '重置密码' : '初始密码'"
           path="password" :rule="{
             required: true,
             message: '请输入密码',
             trigger: ['input', 'blur'],
-          }">
+          }"
+        >
           <n-input v-model:value="modalForm.password" type="password" show-password-on="mousedown" />
         </n-form-item>
 
         <n-form-item v-if="['add', 'setRole'].includes(modalAction)" label="角色" path="roleIds">
-          <n-select v-model:value="modalForm.roleIds" :options="roles" label-field="name" value-field="id" clearable
-            filterable multiple />
+          <n-select
+            v-model:value="modalForm.roleIds" :options="roles" label-field="name" value-field="id" clearable
+            filterable multiple
+          />
         </n-form-item>
         <n-form-item v-if="modalAction === 'add'" label="状态" path="enable">
           <NSwitch v-model:value="modalForm.enable">

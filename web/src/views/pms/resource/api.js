@@ -1,6 +1,5 @@
 // Copyright © 2023 Ronnie Zhang (大脸怪). MIT License.
 
-import axios from 'axios'
 import { request } from '@/utils'
 
 export default {
