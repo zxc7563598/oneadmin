@@ -89,22 +89,22 @@ build: build-web
 	@mkdir -p $(BUILD_DIR)
 	$(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME) $(CMD_DIR)
 
-build-linux: build-web swagger
+build-linux: clean build-web swagger
 	@echo "构建 Linux 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=linux GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-linux-amd64 $(CMD_DIR)
 
-build-macos: build-web swagger
+build-macos: clean build-web swagger
 	@echo "构建 macOS Intel 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=darwin GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-darwin-amd64 $(CMD_DIR)
 
-build-macos-arm: build-web swagger
+build-macos-arm: clean build-web swagger
 	@echo "构建 macOS ARM 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=darwin GOARCH=arm64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-darwin-arm64 $(CMD_DIR)
 
-build-windows: build-web swagger
+build-windows: clean build-web swagger
 	@echo "构建 Windows 版本..."
 	@mkdir -p $(BUILD_DIR)
 	GOOS=windows GOARCH=amd64 $(GO_BUILD) $(LDFLAGS) -o $(BUILD_DIR)/$(APP_NAME)-windows-amd64.exe $(CMD_DIR)
