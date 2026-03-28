@@ -32,6 +32,7 @@ import (
 func main() {
 	port := flag.Int("port", 9000, "服务端口")
 	configPath := flag.String("config", "config.yaml", "配置文件路径")
+	flag.Parse()
 	// 加载配置
 	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
